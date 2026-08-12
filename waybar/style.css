@@ -1,0 +1,135 @@
+* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: rgba(10, 22, 36, 0.65);
+    color: #cdd6f4;
+    transition-property: background-color;
+    transition-duration: .5s;
+}
+
+/* Entire Workspaces Outer Pill Container */
+#workspaces {
+    background-color: rgba(18, 38, 58, 0.75);
+    border: 1px solid rgba(0, 180, 216, 0.35);
+    border-radius: 12px;
+    padding: 0 4px;
+    margin: 4px 2px;
+}
+
+/* Individual Workspace Buttons */
+#workspaces button {
+    padding: 0 8px;
+    background-color: transparent;
+    color: #FF2A2A; /* Helldivers Stratagem Red for inactive numbers */
+    border-radius: 8px;
+    margin: 2px 1px;
+    font-weight: bold;
+}
+
+/* Active Selected Workspace Pill Inside */
+#workspaces button.active {
+    background-color: rgba(0, 180, 216, 0.35);
+    border: 1px solid rgba(0, 180, 216, 0.6);
+    color: #FFE800; /* Helldivers Yellow for active number */
+}
+
+#workspaces button:hover {
+    background-color: rgba(255, 42, 42, 0.2);
+    color: #ffffff;
+}
+
+/* Application Taskbar Icons Container */
+#taskbar {
+    background-color: rgba(18, 38, 58, 0.75);
+    border: 1px solid rgba(0, 180, 216, 0.35);
+    border-radius: 12px;
+    padding: 0 6px;
+    margin: 4px 4px;
+}
+
+#taskbar button {
+    padding: 0 4px;
+    border-radius: 8px;
+}
+
+#taskbar button.active {
+    background-color: rgba(0, 180, 216, 0.3);
+}
+
+/* Hardware Stats Cluster (CPU, GPU, RAM) */
+#cpu,
+#custom-gpu,
+#memory {
+    background-color: rgba(18, 38, 58, 0.75);
+    border: 1px solid rgba(0, 180, 216, 0.35);
+    color: #FFE800;
+    border-radius: 12px;
+    padding: 0 10px;
+    margin: 4px 2px;
+}
+
+/* Center Media Player Module (Helldivers Yellow Pill) */
+#mpris {
+    background-color: rgba(18, 38, 58, 0.85);
+    border: 1px solid #FFE800;
+    color: #FFE800;
+    border-radius: 12px;
+    padding: 0 12px;
+    margin: 4px 2px;
+    font-weight: bold;
+}
+
+#mpris.paused {
+    color: #a6adc8;
+    border: 1px solid rgba(0, 180, 216, 0.35);
+}
+
+/* Cava Visualizer Module */
+#cava {
+    background-color: rgba(18, 38, 58, 0.75);
+    border: 1px solid rgba(0, 180, 216, 0.35);
+    color: #00B4D8;
+    border-radius: 12px;
+    padding: 0 10px;
+    margin: 4px 2px;
+}
+
+/* Right-Side Status Modules */
+#pulseaudio,
+#bluetooth,
+#network,
+#clock,
+#tray {
+    background-color: rgba(18, 38, 58, 0.75);
+    border: 1px solid rgba(0, 180, 216, 0.35);
+    color: #cdd6f4;
+    border-radius: 12px;
+    padding: 0 10px;
+    margin: 4px 2px;
+}
+
+#clock {
+    color: #FFE800;
+}
+
+/* Power Button Module */
+#custom-power {
+    background-color: rgba(18, 38, 58, 0.85);
+    border: 1px solid #FF2A2A;
+    color: #FF2A2A;
+    border-radius: 12px;
+    padding: 0 10px;
+    margin: 4px 2px;
+    font-weight: bold;
+}
+
+#custom-power:hover {
+    background-color: #FF2A2A;
+    color: #0a1624;
+}

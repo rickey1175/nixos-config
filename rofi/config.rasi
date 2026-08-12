@@ -1,0 +1,106 @@
+configuration {
+    modi:                       "drun,run,filebrowser";
+    show-icons:                 true;
+    display-drun:               "drun Search";
+    drun-display-format:        "{name} <i>({generic})</i>";
+    font:                       "JetBrainsMono Nerd Font 11";
+}
+
+* {
+    /* Translucent Helldivers Blue Window Background */
+    bg-col:                     rgba(10, 22, 36, 0.75);
+    bg-col-light:               rgba(18, 38, 58, 0.85);
+    border-col:                 rgba(0, 180, 216, 0.35);
+    
+    /* Super Earth Yellow Main Text & Muted Category Text */
+    yellow-text:                #FFE800;
+    muted-yellow:               rgba(255, 232, 0, 0.60);
+
+    /* Orbital Strike Beacon Red Active Selection */
+    beacon-red:                 #FF0033;
+    beacon-bg:                  rgba(255, 0, 51, 0.30);
+    
+    background-color:           transparent;
+    text-color:                 @yellow-text;
+    margin:                     0;
+    padding:                    0;
+}
+
+window {
+    height:                     520px;
+    width:                      600px;
+    border:                     1px;
+    border-color:               @border-col;
+    border-radius:              24px;
+    background-color:           @bg-col;
+}
+
+mainbox {
+    spacing:                    15px;
+    padding:                    24px;
+    background-color:           transparent;
+    children:                   [ "inputbar", "listview" ];
+}
+
+inputbar {
+    spacing:                    10px;
+    padding:                    12px 18px;
+    border-radius:              18px;
+    background-color:           @bg-col-light;
+    children:                   [ "entry" ];
+}
+
+entry {
+    placeholder:                "drun Search";
+    placeholder-color:          @muted-yellow;
+    text-color:                 @yellow-text;
+    background-color:           transparent;
+}
+
+listview {
+    columns:                    1;
+    lines:                      7;
+    spacing:                    8px;
+    cycle:                      true;
+    dynamic:                    true;
+    layout:                     vertical;
+    background-color:           transparent;
+}
+
+element {
+    padding:                    10px 14px;
+    border-radius:              14px;
+    spacing:                    14px;
+    background-color:           transparent;
+    text-color:                 @yellow-text;
+    children:                   [ "element-icon", "element-text" ];
+}
+
+/* Force all unselected element states to stay transparent */
+element normal.normal,
+element normal.active,
+element alternate.normal,
+element alternate.active {
+    background-color:           transparent;
+    text-color:                 @yellow-text;
+}
+
+element-icon {
+    size:                       32px;
+    background-color:           transparent;
+}
+
+element-text {
+    vertical-align:             0.5;
+    background-color:           transparent;
+    text-color:                 inherit;
+}
+
+/* Orbital Strike Red Highlight on Active Hover / Selection */
+element selected.normal,
+element selected.active {
+    background-color:           @beacon-bg;
+    border:                     1px;
+    border-color:               @beacon-red;
+    text-color:                 #FFFFFF;
+}

@@ -1,0 +1,103 @@
+{
+    "layer": "top",
+    "position": "top",
+    "height": 38,
+    "spacing": 4,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "wlr/taskbar",
+        "cpu",
+        "custom/gpu",
+        "memory"
+    ],
+    "modules-center": [
+        "custom/media"
+    ],
+    "modules-right": [
+        "pulseaudio",
+        "bluetooth",
+        "network",
+        "clock",
+        "tray"
+    ],
+
+    "hyprland/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
+        "active-only": false,
+        "on-click": "activate",
+        "format": "{name}",
+        "persistent-workspaces": {
+            "*": 5
+        }
+    },
+
+    "wlr/taskbar": {
+        "format": "{icon}",
+        "icon-size": 18,
+        "icon-theme": "Numix-Circle",
+        "tooltip-format": "{title}",
+        "on-click": "activate",
+        "on-click-middle": "close"
+    },
+
+    "cpu": {
+        "format": "󰍛 {usage}%",
+        "interval": 2,
+        "tooltip": true
+    },
+
+    "custom/gpu": {
+        "exec": "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null || echo 0",
+        "format": "󰢮 {}%",
+        "interval": 2,
+        "tooltip": false
+    },
+
+    "memory": {
+        "format": "󰘚 {percentage}%",
+        "interval": 2,
+        "tooltip-format": "RAM: {used:0.1f}GiB / {total:0.1f}GiB"
+    },
+
+    "custom/media": {
+        "format": "{}",
+        "return-type": "json",
+        "exec": "~/.config/waybar/scripts/mediaplayer.py",
+        "on-click": "playerctl play-pause",
+        "markup": "pango"
+    },
+
+    "clock": {
+        "format": "{:%I:%M %p}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟 Muted",
+        "format-icons": {
+            "default": ["󰕿", "󰖀", "󰕾"]
+        },
+        "on-click": "pavucontrol"
+    },
+
+    "bluetooth": {
+        "format": "󰂯",
+        "format-connected": "󰂱",
+        "format-disabled": "󰂲",
+        "on-click": "blueman-manager"
+    },
+
+    "network": {
+        "format-wifi": "󰤨 {essid}",
+        "format-ethernet": "󰈀 Ethernet",
+        "format-disconnected": "󰤭 Disconnected",
+        "on-click": "nm-connection-editor"
+    },
+
+    "tray": {
+        "spacing": 10
+    }
+}
