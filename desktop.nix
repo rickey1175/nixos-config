@@ -23,18 +23,36 @@
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
 
-  # NVIDIA Session Environment Variables
+  # Session Environment Variables
   environment.sessionVariables = {
     LIBVA_DRIVER_NAME = "nvidia";
     GBM_BACKEND = "nvidia-drm";
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
   };
 
-  # Container Virtualization & NVIDIA CDI for DaVinci Resolve (Desktop Only)
+  # Container Virtualization & NVIDIA CDI
   hardware.nvidia-container-toolkit = {
     enable = true;
     mount-nvidia-executables = true;
   };
+
+  # Desktop-Only System Packages (CUDA OBS & NVTop)
+  environment.systemPackages = with pkgs; [
+    nvtopPackages.nvidia
+    nvidia-container-toolkit
+    (wrapOBS.override {
+      obs-studio = pkgs.obs-studio.override {
+        cudaSupport = true;
+      };
+    } {
+      plugins = with pkgs.obs-studio-plugins; [
+        wlrobs
+        obs-vaapi
+        obs-pipewire-audio-capture
+        obs-vkcapture
+      ];
+    })
+  ];
 
   # Dedicated Game Storage Mount (Desktop Only)
   fileSystems."/mnt/games" = {

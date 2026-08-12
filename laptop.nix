@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  # Intel Graphics & VA-API Hardware Acceleration
+  # Intel Graphics & Hardware Acceleration
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
@@ -11,6 +11,9 @@
     ];
   };
 
-  # Intel Integrated GPU Video Driver
   services.xserver.videoDrivers = [ "modesetting" ];
+
+  # Power Management
+  services.tlp.enable = true;
+  services.thermald.enable = true;
 }
