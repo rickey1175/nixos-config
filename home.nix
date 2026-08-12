@@ -48,9 +48,7 @@
       fm = "yazi";
     };
 
-    # Zoxide (smart cd) init
     initExtra = ''
-      eval "$(zoxide init zsh)"
       export PATH=$HOME/.local/bin:$PATH
     '';
   };
@@ -61,6 +59,7 @@
     enableZshIntegration = true;
   };
 
+  # Enable fzf shell keybindings
   programs.fzf = {
     enable = true;
     enableZshIntegration = true;
