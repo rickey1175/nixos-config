@@ -9,7 +9,14 @@
     fastfetch
     btop
     pavucontrol
+    starship
   ];
+
+  # Enable Starship shell integration via Home Manager
+  programs.starship = {
+    enable = true;
+    enableZshIntegration = true;
+  };
 
   # Symlink dotfiles directly from ~/nixos into ~/.config
   home.file.".config/hypr".source = ./hypr;
