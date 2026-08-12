@@ -1,7 +1,7 @@
 { config, pkgs, ... }:
 
 {
-  # NVIDIA Ada Lovelace Drivers & CUDA
+  # NVIDIA Ada Lovelace Drivers & CUDA Support
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
@@ -28,6 +28,12 @@
     LIBVA_DRIVER_NAME = "nvidia";
     GBM_BACKEND = "nvidia-drm";
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
+  };
+
+  # Container Virtualization & NVIDIA CDI for DaVinci Resolve (Desktop Only)
+  hardware.nvidia-container-toolkit = {
+    enable = true;
+    mount-nvidia-executables = true;
   };
 
   # Dedicated Game Storage Mount (Desktop Only)
