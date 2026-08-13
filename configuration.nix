@@ -1,5 +1,8 @@
-# ---------------------------------------------------------------------------
-  # Screencasting & Desktop Portals (Fixes OBS PipeWire Screen Capture)
+{ config, pkgs, ... }:
+
+{
+  # ---------------------------------------------------------------------------
+  # Screencasting & Desktop Portals (OBS PipeWire Fix)
   # ---------------------------------------------------------------------------
   security.polkit.enable = true;
   xdg.portal = {
