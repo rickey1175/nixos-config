@@ -4,8 +4,20 @@
   home.username = "rickey";
   home.homeDirectory = "/home/rickey";
 
+  # Allow unfree packages inside Home Manager
+  nixpkgs.config.allowUnfree = true;
+
   # Complete User-Space Packages List
   home.packages = with pkgs; [
+    # Applications
+    brave
+    obs-studio
+
+    # Wallpaper Daemons
+    hyprpaper
+    awww
+    swaybg
+
     # Terminal UI Tools & File Managers
     yazi
     fzf
