@@ -4,12 +4,12 @@
   home.username = "rickey";
   home.homeDirectory = "/home/rickey";
 
-  # Auto-start Hyprland on TTY1 login
-  programs.bash = {
+  # Enable Zsh and auto-start Hyprland on TTY1 login
+  programs.zsh = {
     enable = true;
     profileExtra = ''
       if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
-        exec Hyprland
+        exec start-hyprland
       fi
     '';
   };
@@ -18,8 +18,9 @@
   home.packages = with pkgs; [
     # Desktop Applications
     brave
+    waypaper
 
-    # Wallpaper Daemons
+    # Wallpaper Daemons & Backends
     hyprpaper
     awww
     swaybg
