@@ -15,6 +15,9 @@
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
 
+  # Enable system-level Zsh environment
+  programs.zsh.enable = true;
+
   # User Account Configuration
   users.users.rickey = {
     isNormalUser = true;
