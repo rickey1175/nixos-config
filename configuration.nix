@@ -27,7 +27,7 @@
   };
 
   # ---------------------------------------------------------------------------
-  # Bulletproof Login Manager (greetd + tuigreet)
+  # Login Manager (greetd + tuigreet)
   # ---------------------------------------------------------------------------
   services.greetd = {
     enable = true;
