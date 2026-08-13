@@ -15,6 +15,9 @@
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
 
+  # Enable Experimental Nix Features Globally (Fixes nix-command/flakes CLI warnings)
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+
   # Enable System-Level Zsh & Hyprland
   programs.zsh.enable = true;
   programs.hyprland.enable = true;
@@ -27,11 +30,11 @@
     shell = pkgs.zsh;
   };
 
-  # Automatic TTY1 Login (Bypasses login screen completely)
+  # Automatic TTY1 Login (Bypasses display managers completely)
   services.getty.autologinUser = "rickey";
 
   # ---------------------------------------------------------------------------
-  # Screencasting & Desktop Portals (PipeWire / OBS Setup)
+  # Screencasting & Desktop Portals (OBS / Hyprland PipeWire Setup)
   # ---------------------------------------------------------------------------
   security.polkit.enable = true;
   xdg.portal = {
@@ -78,7 +81,7 @@
   environment.systemPackages = with pkgs; [
     # Core Editors, Shell & Tools
     vim git wget curl kitty alacritty brave discord vscode wl-clipboard pavucontrol fastfetch 
-    playerctl python3
+    playerctl python3 obs-studio
 
     # Storage & Virtualization Tools
     gparted parted udisks virt-manager qemu qemu_kvm OVMF
