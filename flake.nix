@@ -22,6 +22,7 @@
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
             home-manager.users.rickey = import ./home.nix;
           }
         ];
@@ -31,13 +32,14 @@
       laptop = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          ./laptop-hardware.nix # <--- THIS IS THE MISSING PIECE
+          ./laptop-hardware.nix
           ./configuration.nix
           ./laptop.nix
           home-manager.nixosModules.home-manager
           {
             home-manager.useGlobalPkgs = true;
             home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
             home-manager.users.rickey = import ./home.nix;
           }
         ];
