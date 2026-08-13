@@ -24,16 +24,28 @@
     description = "Rickey";
     extraGroups = [ "networkmanager" "wheel" "video" "audio" ];
     shell = pkgs.zsh;
-    initialPassword = "changeme"; # Set initial temporary password
   };
 
-  # Automatic TTY1 Login (Bypasses login screen on boot)
-  services.getty.autologinUser = "rickey";
+  # ---------------------------------------------------------------------------
+  # Bulletproof Login Manager (greetd + tuigreet)
+  # ---------------------------------------------------------------------------
+  services.greetd = {
+    enable = true;
+    settings = {
+      default_session = {
+        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
+        user = "greeter";
+      };
+    };
+  };
+
+  # System security & keyring
+  security.polkit.enable = true;
+  security.pam.services.greetd.enableGnomeKeyring = true;
 
   # ---------------------------------------------------------------------------
-  # Screencasting & Desktop Portals (OBS PipeWire Fix)
+  # Screencasting & Desktop Portals
   # ---------------------------------------------------------------------------
-  security.polkit.enable = true;
   xdg.portal = {
     enable = true;
     wlr.enable = true;
@@ -78,7 +90,7 @@
   environment.systemPackages = with pkgs; [
     # Core Editors, Shell & Tools
     vim git wget curl kitty alacritty brave discord vscode wl-clipboard pavucontrol fastfetch 
-    playerctl python3
+    playerctl python3 greetd.tuigreet
 
     # Storage & Virtualization Tools
     gparted parted udisks virt-manager qemu qemu_kvm OVMF
