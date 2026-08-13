@@ -1,9 +1,5 @@
 { config, pkgs, ... }:
 
-let
-  # Fail-safe package lookup across any nixpkgs flake commit
-  tuigreetPkg = pkgs.greetd.tuigreet or pkgs.greetd.tuigreet;
-in
 {
   imports = [
     ./hardware-configuration.nix
@@ -19,8 +15,9 @@ in
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
 
-  # Enable System-Level Zsh Environment
+  # Enable System-Level Zsh & Hyprland
   programs.zsh.enable = true;
+  programs.hyprland.enable = true;
 
   # User Account Configuration
   users.users.rickey = {
@@ -30,26 +27,13 @@ in
     shell = pkgs.zsh;
   };
 
-  # ---------------------------------------------------------------------------
-  # Login Manager (greetd + tuigreet)
-  # ---------------------------------------------------------------------------
-  services.greetd = {
-    enable = true;
-    settings = {
-      default_session = {
-        command = "${tuigreetPkg}/bin/tuigreet --time --remember --cmd Hyprland";
-        user = "greeter";
-      };
-    };
-  };
+  # Automatic TTY1 Login (Bypasses login screen completely)
+  services.getty.autologinUser = "rickey";
 
-  # System security & keyring
+  # ---------------------------------------------------------------------------
+  # Screencasting & Desktop Portals (PipeWire / OBS Setup)
+  # ---------------------------------------------------------------------------
   security.polkit.enable = true;
-  security.pam.services.greetd.enableGnomeKeyring = true;
-
-  # ---------------------------------------------------------------------------
-  # Screencasting & Desktop Portals
-  # ---------------------------------------------------------------------------
   xdg.portal = {
     enable = true;
     wlr.enable = true;
@@ -94,7 +78,7 @@ in
   environment.systemPackages = with pkgs; [
     # Core Editors, Shell & Tools
     vim git wget curl kitty alacritty brave discord vscode wl-clipboard pavucontrol fastfetch 
-    playerctl python3 tuigreetPkg
+    playerctl python3
 
     # Storage & Virtualization Tools
     gparted parted udisks virt-manager qemu qemu_kvm OVMF
