@@ -1,8 +1,8 @@
-{ config, pkgs, ... }:
+{ config, pkgs, lib, ... }:
 
 {
   home.username = "rickey";
-  home.homeDirectory = "/home/rickey";
+  home.homeDirectory = lib.mkForce "/home/rickey";
 
   programs.zsh = {
     enable = true;
@@ -28,7 +28,7 @@
     '';
   };
 
-  # Native Zoxide Integration (Use 'z' to jump around without breaking standard 'cd')
+  # Native Zoxide Integration
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
