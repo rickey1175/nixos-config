@@ -1,5 +1,9 @@
 { config, pkgs, ... }:
 
+let
+  # Fail-safe package lookup across any nixpkgs flake commit
+  tuigreetPkg = pkgs.greetd.tuigreet or pkgs.greetd.tuigreet;
+in
 {
   imports = [
     ./hardware-configuration.nix
@@ -33,7 +37,7 @@
     enable = true;
     settings = {
       default_session = {
-        command = "${pkgs.greetd.tuigreet}/bin/tuigreet --time --remember --cmd Hyprland";
+        command = "${tuigreetPkg}/bin/tuigreet --time --remember --cmd Hyprland";
         user = "greeter";
       };
     };
@@ -90,7 +94,7 @@
   environment.systemPackages = with pkgs; [
     # Core Editors, Shell & Tools
     vim git wget curl kitty alacritty brave discord vscode wl-clipboard pavucontrol fastfetch 
-    playerctl python3 tuigreet
+    playerctl python3 tuigreetPkg
 
     # Storage & Virtualization Tools
     gparted parted udisks virt-manager qemu qemu_kvm OVMF
