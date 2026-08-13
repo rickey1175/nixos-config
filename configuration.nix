@@ -86,7 +86,7 @@
     plugins = with pkgs.obs-studio-plugins; [
       wlrobs
       obs-vkcapture
-      obs-pipewire-audio-plugins
+      obs-pipewire-audio-capture
     ];
   };
 
