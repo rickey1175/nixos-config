@@ -7,4 +7,18 @@
     fsType = "ext4";
     options = [ "defaults" "nofail" "x-gvfs-show" ];
   };
+
+  # Declarative Portal Setup
+  xdg.portal = {
+    enable = true;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-hyprland
+      pkgs.xdg-desktop-portal-gtk
+    ];
+    config = {
+      common = {
+        default = [ "hyprland" "gtk" ];
+      };
+    };
+  };
 }
