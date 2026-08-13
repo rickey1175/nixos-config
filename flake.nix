@@ -1,5 +1,5 @@
 {
-  description = "Multi-host NixOS Flake Configuration";
+  description = "NixOS Flake Configuration";
 
   inputs = {
     nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
@@ -11,11 +11,10 @@
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs: {
     nixosConfigurations = {
-      # Main Desktop Setup
+      # Desktop Setup
       nixos = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          { nixpkgs.config.allowUnfree = true; }
           ./hardware-configuration.nix
           ./configuration.nix
           ./desktop.nix
@@ -32,7 +31,7 @@
       laptop = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
-          { nixpkgs.config.allowUnfree = true; }
+          ./laptop-hardware.nix # <--- THIS IS THE MISSING PIECE
           ./configuration.nix
           ./laptop.nix
           home-manager.nixosModules.home-manager
