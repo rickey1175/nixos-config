@@ -1,37 +1,54 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ./hardware-configuration.nix
-    ./video.nix
-    ./desktop.nix
-  ];
-
   # Bootloader Configuration
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Networking & Hostname
+  # Networking & Time Sync
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
+  time.timeZone = "America/New_York";
+  services.timesyncd.enable = true;
 
   # Enable Experimental Nix Features Globally
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # Enable System-Level Shell & Hyprland
+  # Enable System-Level Shell, Hyprland & FZF Keybindings (Ctrl+R / Ctrl+T)
   programs.zsh.enable = true;
   programs.hyprland.enable = true;
+  programs.fzf = {
+    keybindings = true;
+    fuzzyCompletion = true;
+  };
 
-  # User Account Configuration
+  # User Account Configuration (Lowercase 'rickey')
   users.users.rickey = {
     isNormalUser = true;
-    description = "Rickey";
-    extraGroups = [ "networkmanager" "wheel" "video" "audio" ];
+    description = "rickey";
+    extraGroups = [ "networkmanager" "wheel" "video" "audio" "libvirtd" ];
     shell = pkgs.zsh;
   };
 
-  # Automatic TTY1 Login (Bypasses display managers completely)
+  # Automatic TTY1 Login
   services.getty.autologinUser = "rickey";
+
+  # ---------------------------------------------------------------------------
+  # Virtualization & Container Services (Virt-Manager & QEMU Auto-Connection)
+  # ---------------------------------------------------------------------------
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu = {
+      package = pkgs.qemu_kvm;
+      runAsRoot = true;
+      swtpm.enable = true; # Enforce TPM emulation for VMs
+    };
+  };
+  programs.virt-manager.enable = true;
+
+  # Force socket activation so virt-manager auto-detects qemu:///system
+  systemd.services.libvirtd.wantedBy = [ "multi-user.target" ];
+  systemd.sockets.virtqemud.enable = true;
 
   # ---------------------------------------------------------------------------
   # Screencasting & Desktop Portals (OBS / Hyprland PipeWire Setup)
@@ -74,7 +91,7 @@
   services.blueman.enable = true;
 
   # ---------------------------------------------------------------------------
-  # Font Configuration (Fixes Waybar Icon Glitches)
+  # Font Configuration
   # ---------------------------------------------------------------------------
   fonts.packages = with pkgs; [
     font-awesome
@@ -90,7 +107,7 @@
   environment.systemPackages = with pkgs; [
     # Core Editors, Shell & Tools
     vim git wget curl kitty alacritty brave discord vscode wl-clipboard pavucontrol fastfetch 
-    playerctl python3 obs-studio
+    playerctl python3 obs-studio fzf
 
     # Storage & Virtualization Tools
     gparted parted udisks virt-manager qemu qemu_kvm OVMF
@@ -120,7 +137,7 @@
   };
   programs.gamemode.enable = true;
 
-  # Allow user FUSE mounts (Fixes xdg-document-portal dependency crashes)
+  # Allow user FUSE mounts
   programs.fuse.userAllowOther = true;
 
   system.stateVersion = "26.05";
