@@ -18,6 +18,12 @@
   time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";
 
+  # Passwordless Sudo for Remote Deployments
+  security.sudo = {
+    enable = true;
+    wheelNeedsPassword = false;
+  };
+
   # Bluetooth Configuration & Blueman Service
   hardware.bluetooth = {
     enable = true;
@@ -108,9 +114,10 @@
 
   # Shared Global System Packages
   environment.systemPackages = with pkgs; [
-    # Shell Bar, Launcher, Wallpaper UI & Lock Stack
+    # Shell Bar, Launcher, TUI File Manager, Wallpaper UI & Lock Stack
     waybar
     rofi
+    yazi
     swww
     waypaper
     dunst
@@ -136,6 +143,8 @@
     fastfetch
     playerctl
     python3
+    zoxide
+    ripgrep
 
     # System Monitoring
     btop
