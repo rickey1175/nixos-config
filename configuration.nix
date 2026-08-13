@@ -15,10 +15,10 @@
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
 
-  # Enable Experimental Nix Features Globally (Fixes nix-command/flakes CLI warnings)
+  # Enable Experimental Nix Features Globally
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
 
-  # Enable System-Level Zsh & Hyprland
+  # Enable System-Level Shell & Hyprland
   programs.zsh.enable = true;
   programs.hyprland.enable = true;
 
@@ -74,6 +74,15 @@
   services.blueman.enable = true;
 
   # ---------------------------------------------------------------------------
+  # Font Configuration (Fixes Waybar Icon Glitches)
+  # ---------------------------------------------------------------------------
+  fonts.packages = with pkgs; [
+    font-awesome
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.symbols-only
+  ];
+
+  # ---------------------------------------------------------------------------
   # System Packages Baseline
   # ---------------------------------------------------------------------------
   nixpkgs.config.allowUnfree = true;
@@ -87,7 +96,7 @@
     gparted parted udisks virt-manager qemu qemu_kvm OVMF
 
     # Desktop Ricing & GUI Stack
-    waybar rofi swww waypaper dunst hyprlock hypridle hyprpolkitagent networkmanagerapplet eww cava wlogout
+    waybar rofi awww waypaper dunst hyprlock hypridle hyprpolkitagent networkmanagerapplet eww cava wlogout
 
     # System Monitoring
     btop
@@ -103,13 +112,16 @@
   ];
 
   # ---------------------------------------------------------------------------
-  # Gaming Optimizations
+  # Gaming Optimizations & System Fixes
   # ---------------------------------------------------------------------------
   programs.steam = {
     enable = true;
     gamescopeSession.enable = true;
   };
   programs.gamemode.enable = true;
+
+  # Allow user FUSE mounts (Fixes xdg-document-portal dependency crashes)
+  programs.fuse.userAllowOther = true;
 
   system.stateVersion = "26.05";
 }

@@ -23,9 +23,9 @@ local menu        = "rofi -show drun"
 ---- AUTOSTART ----
 -------------------
 hl.on("hyprland.start", function ()
-   -- Sync DBus & systemd environment variables for OBS/PipeWire portals
-   hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP=Hyprland &")
-   hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP &")
+   -- Sync DBus & systemd environment variables (including socket signature)
+   hl.exec_cmd("dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE &")
+   hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE &")
    hl.exec_cmd("systemctl --user restart xdg-desktop-portal-hyprland xdg-desktop-portal &")
 
    -- Core Desktop Daemons & Applets
