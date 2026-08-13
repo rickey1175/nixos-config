@@ -15,7 +15,7 @@
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
 
-  # Enable system-level Zsh environment
+  # Enable System-Level Zsh Environment
   programs.zsh.enable = true;
 
   # User Account Configuration
@@ -24,7 +24,11 @@
     description = "Rickey";
     extraGroups = [ "networkmanager" "wheel" "video" "audio" ];
     shell = pkgs.zsh;
+    initialPassword = "changeme"; # Set initial temporary password
   };
+
+  # Automatic TTY1 Login (Bypasses login screen on boot)
+  services.getty.autologinUser = "rickey";
 
   # ---------------------------------------------------------------------------
   # Screencasting & Desktop Portals (OBS PipeWire Fix)
