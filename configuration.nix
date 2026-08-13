@@ -32,7 +32,7 @@
     extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
   };
 
-  # Allow Unfree Packages
+  # Allow Unfree Packages Globally
   nixpkgs.config.allowUnfree = true;
 
   # System-Wide Packages
@@ -46,7 +46,7 @@
 
     # Hyprland Ecosystem
     waybar
-    rofi-wayland
+    rofi
     dunst
     hyprpaper
     awww

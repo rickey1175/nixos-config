@@ -4,9 +4,6 @@
   home.username = "rickey";
   home.homeDirectory = "/home/rickey";
 
-  # Allow unfree packages inside Home Manager
-  nixpkgs.config.allowUnfree = true;
-
   # Complete User-Space Packages List
   home.packages = with pkgs; [
     # Desktop Applications
