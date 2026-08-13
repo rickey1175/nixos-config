@@ -4,9 +4,25 @@
   home.username = "rickey";
   home.homeDirectory = "/home/rickey";
 
-  # Enable Zsh and auto-start Hyprland on TTY1 login
+  # Enable Zsh, custom aliases, and auto-start Hyprland on TTY1 login
   programs.zsh = {
     enable = true;
+    shellAliases = {
+      # File Manager Shortcuts
+      fm = "yazi";
+      filemanager = "dolphin . &";
+
+      # Core Utility Replacements
+      ls = "eza --icons";
+      ll = "eza -la --icons";
+      cat = "bat";
+      cd = "z";
+
+      # NixOS Quick Rebuild Shortcuts
+      rebuild = "sudo nixos-rebuild switch --flake ~/nixos#nixos";
+      nc = "cd ~/nixos && nvim configuration.nix";
+      nh = "cd ~/nixos && nvim home.nix";
+    };
     profileExtra = ''
       if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
         exec start-hyprland
