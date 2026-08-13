@@ -18,6 +18,12 @@
   services.tlp.enable = true;
   services.thermald.enable = true;
 
+  # Display Manager (SDDM with Wayland Support)
+  services.displayManager.sddm = {
+    enable = true;
+    wayland.enable = true;
+  };
+
   # XDG Desktop Portal for PipeWire Screen Sharing in OBS
   xdg.portal = {
     enable = true;
@@ -25,6 +31,7 @@
       pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-gtk
     ];
+    config.common.default = "*";
   };
 
   # Sound & PipeWire Setup
