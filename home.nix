@@ -9,9 +9,8 @@
 
   # Complete User-Space Packages List
   home.packages = with pkgs; [
-    # Applications
+    # Desktop Applications
     brave
-    obs-studio
 
     # Wallpaper Daemons
     hyprpaper
@@ -39,7 +38,7 @@
     playerctl
   ];
 
-  # Dotfile Symlinks
+  # Dotfile Symlinks from ~/nixos
   xdg.configFile."hypr".source = ./hypr;
   xdg.configFile."kitty".source = ./kitty;
   xdg.configFile."waybar".source = ./waybar;

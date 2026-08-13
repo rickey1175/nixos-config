@@ -1,160 +1,64 @@
 { config, pkgs, ... }:
 
 {
-  # Global Unfree License Authorization
-  nixpkgs.config.allowUnfree = true;
+  imports = [
+    ./hardware-configuration.nix
+  ];
 
-  # Bootloader & Kernel Settings
+  # Bootloader Configuration
   boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 10;
   boot.loader.efi.canTouchEfiVariables = true;
 
-  # Mainline Kernel
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-
-  # Networking & Locale
+  # Networking Setup
   networking.hostName = "nixos";
   networking.networkmanager.enable = true;
+
+  # Time Zone & Locale Settings
   time.timeZone = "America/New_York";
   i18n.defaultLocale = "en_US.UTF-8";
 
-  # Passwordless Sudo for Remote Deployments
-  security.sudo = {
-    enable = true;
-    wheelNeedsPassword = false;
-  };
+  # Enable Hyprland Window Manager
+  programs.hyprland.enable = true;
 
-  # Bluetooth Configuration & Blueman Service
-  hardware.bluetooth = {
-    enable = true;
-    powerOnBoot = true;
-  };
-  services.blueman.enable = true;
+  # Display Manager (SDDM or GDM)
+  services.displayManager.sddm.enable = true;
 
-  # Fonts
-  fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
-    font-awesome
-    noto-fonts-color-emoji
-  ];
-
-  # SSH Server Daemon
-  services.openssh = {
-    enable = true;
-    settings = {
-      PermitRootLogin = "no";
-      PasswordAuthentication = true;
-    };
-  };
-  networking.firewall.allowedTCPPorts = [ 22 ];
-
-  # Storage Auto-Mounting & Power Handling
-  services.udisks2.enable = true;
-  services.gvfs.enable = true;
-  services.devmon.enable = true;
-
-  services.logind.settings.Login = {
-    HandlePowerKey = "poweroff";
-    HandlePowerKeyLongPress = "reboot";
-  };
-
-  # Display Server & Hyprland
-  services.xserver.enable = true;
-  services.seatd.enable = true;
-  services.displayManager.sddm.enable = false;
-
-  programs.hyprland = {
-    enable = true;
-    xwayland.enable = true;
-  };
-
-  programs.zsh.enable = true;
-
-  # User Account & TTY Setup
+  # User Configuration
   users.users.rickey = {
     isNormalUser = true;
-    description = "Rickey";
-    extraGroups = [
-      "networkmanager"
-      "wheel"
-      "video"
-      "audio"
-      "gamemode"
-      "seat"
-      "podman"
-      "render"
-      "libvirtd"
-    ];
-    shell = pkgs.zsh;
+    extraGroups = [ "wheel" "networkmanager" "video" "audio" ];
   };
 
-  # TTY1 Auto-Login
-  services.getty.autologinUser = "rickey";
+  # Allow Unfree Packages
+  nixpkgs.config.allowUnfree = true;
 
-  # Flatpak & Virtualization Stack (QEMU / KVM / Virt-Manager)
-  services.flatpak.enable = true;
-  programs.dconf.enable = true;
-  virtualisation.libvirtd.enable = true;
-  programs.virt-manager.enable = true;
-
-  # Screencasting & Desktop Portals
-  security.polkit.enable = true;
-  xdg.portal = {
-    enable = true;
-    extraPortals = [
-      pkgs.xdg-desktop-portal-hyprland
-      pkgs.xdg-desktop-portal-gtk
-    ];
-    config = {
-      common = {
-        default = [ "hyprland" ];
-      };
-    };
-  };
-
-  # Shared Global System Packages
+  # System-Wide Packages
   environment.systemPackages = with pkgs; [
-    # Shell Bar, Launcher, TUI File Manager, Wallpaper UI & Lock Stack
-    waybar
-    rofi
-    yazi
-    swww
-    waypaper
-    dunst
-    hyprlock
-    hypridle
-    hyprpolkitagent
-    networkmanagerapplet
-    eww
-    wlogout
-
-    # Core Utilities, Browsers & Media Control
-    vim
+    # Core Utilities & Editors
     git
+    neovim
     wget
     curl
     kitty
-    alacritty
-    brave
-    discord
-    vscode
-    wl-clipboard
-    pavucontrol
-    fastfetch
-    playerctl
-    python3
-    zoxide
-    ripgrep
 
-    # System Monitoring
-    btop
+    # Hyprland Ecosystem
+    waybar
+    rofi-wayland
+    dunst
+    hyprpaper
+    awww
+    swaybg
+
+    # Audio Control
+    pavucontrol
+    pulseaudio
 
     # Media & File Managers
     vlc
     kdePackages.dolphin
     kdePackages.ffmpegthumbs
 
-    # Container & Setup Utilities
+    # Container & System Utilities
     podman
     distrobox
     unzip
@@ -163,12 +67,44 @@
     pciutils
     lshw
 
-    # Gaming Stack & Base OBS Studio
+    # Gaming Stack
     protonup-qt
     mangohud
     gamescope
-    obs-studio
+
+    # Fonts for Waybar / Icons
+    font-awesome
+    nerd-fonts.jetbrains-mono
   ];
+
+  # Wrapped OBS Studio with PipeWire Screen Capture & Vulkan Plugins
+  programs.obs-studio = {
+    enable = true;
+    plugins = with pkgs.obs-studio-plugins; [
+      wlrobs
+      obs-vkcapture
+      obs-pipewire-audio-plugins
+    ];
+  };
+
+  # XDG Desktop Portals for Hyprland Screen Sharing
+  xdg.portal = {
+    enable = true;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-hyprland
+      pkgs.xdg-desktop-portal-gtk
+    ];
+    config.common.default = "*";
+  };
+
+  # PipeWire Audio Setup
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+  };
 
   # Gaming Optimizations
   programs.steam = {
