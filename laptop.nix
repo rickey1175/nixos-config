@@ -13,7 +13,7 @@
 
   services.xserver.videoDrivers = [ "modesetting" ];
 
-  # Power Management
+  # Power Management & Thermal Controls
   services.tlp.enable = true;
   services.thermald.enable = true;
 }
