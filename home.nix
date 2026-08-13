@@ -4,6 +4,16 @@
   home.username = "rickey";
   home.homeDirectory = "/home/rickey";
 
+  # Auto-start Hyprland on TTY1 login
+  programs.bash = {
+    enable = true;
+    profileExtra = ''
+      if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
+        exec Hyprland
+      fi
+    '';
+  };
+
   # Complete User-Space Packages List
   home.packages = with pkgs; [
     # Desktop Applications

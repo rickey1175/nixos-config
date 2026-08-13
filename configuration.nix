@@ -20,11 +20,8 @@
   # Enable Hyprland Window Manager
   programs.hyprland.enable = true;
 
-  # Display Manager (SDDM with Wayland Support)
-  services.displayManager.sddm = {
-    enable = true;
-    wayland.enable = true;
-  };
+  # Auto-login to TTY1 (No Display Manager / SDDM Needed)
+  services.getty.autologinUser = "rickey";
 
   # User Configuration
   users.users.rickey = {
