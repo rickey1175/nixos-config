@@ -1,107 +1,22 @@
-# =========================================================================
-# CORE SYSTEM & RICE STACK BASELINE (SHARED & MAIN PC BASE)
-# =========================================================================
-{ config, pkgs, ... }:
-
-{
-  imports = [
-    ./hardware-configuration.nix
-    ./video.nix  # Nvidia, CUDA, Containers & Video Production Stack
-  ];
-
-  # ---------------------------------------------------------------------------
-  # Bootloader & Kernel Settings
-  # ---------------------------------------------------------------------------
-  boot.loader.systemd-boot.enable = true;
-  boot.loader.systemd-boot.configurationLimit = 5; # Prevents /boot overflow
-  boot.loader.efi.canTouchEfiVariables = true;
-  
-  # Mainline kernel for updated Bluetooth, GPU & hardware support
-  boot.kernelPackages = pkgs.linuxPackages_latest;
-
-  # ---------------------------------------------------------------------------
-  # Networking & Locale
-  # ---------------------------------------------------------------------------
-  networking.hostName = "nixos";
-  networking.networkmanager.enable = true;
-  time.timeZone = "America/New_York";
-  i18n.defaultLocale = "en_US.UTF-8";
-
-  fonts.packages = with pkgs; [
-    nerd-fonts.jetbrains-mono
-    font-awesome
-    noto-fonts-color-emoji
-  ];
-
-  # ---------------------------------------------------------------------------
-  # Storage Auto-Mounting & Removable Media Services
-  # ---------------------------------------------------------------------------
-  services.udisks2.enable = true;
-  services.gvfs.enable = true;
-  services.devmon.enable = true;
-
-  # ---------------------------------------------------------------------------
-  # Physical Power Button Handling
-  # ---------------------------------------------------------------------------
-  services.logind.settings.Login = {
-    HandlePowerKey = "poweroff";
-    HandlePowerKeyLongPress = "reboot";
-  };
-
-  # ---------------------------------------------------------------------------
-  # Display Server & Pure TTY Autologin (SDDM Disabled)
-  # ---------------------------------------------------------------------------
-  services.xserver.enable = true;
-  services.seatd.enable = true;
-  
-  services.displayManager.sddm.enable = false;
-  services.xserver.displayManager.lightdm.enable = false;
-
-  programs.hyprland = {
-    enable = true;
-    xwayland.enable = true;
-  };
-
-  programs.zsh.enable = true;
-
-  # User Account & TTY Autologin Setup
-  users.users.rickey = {
-    isNormalUser = true;
-    description = "Rickey";
-    extraGroups = [ 
-      "networkmanager" 
-      "wheel" 
-      "video" 
-      "audio" 
-      "gamemode" 
-      "seat" 
-      "podman" 
-      "render" 
-      "libvirtd"
-    ];
-    shell = pkgs.zsh;
-  };
-  
-  services.getty.autologinUser = "rickey";
-
-  # ---------------------------------------------------------------------------
-  # Virtualization & Flatpak
-  # ---------------------------------------------------------------------------
-  services.flatpak.enable = true;
-  programs.dconf.enable = true;
-  virtualisation.libvirtd.enable = true;
-
-  # ---------------------------------------------------------------------------
-  # Screencasting & Desktop Portals
+# ---------------------------------------------------------------------------
+  # Screencasting & Desktop Portals (Fixes OBS PipeWire Screen Capture)
   # ---------------------------------------------------------------------------
   security.polkit.enable = true;
   xdg.portal = {
     enable = true;
+    wlr.enable = true;
     extraPortals = [
       pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-gtk
     ];
-    config.common.default = [ "hyprland" "gtk" ];
+    config = {
+      common = {
+        default = [ "hyprland" "gtk" ];
+      };
+      hyprland = {
+        default = [ "hyprland" "gtk" ];
+      };
+    };
   };
 
   # ---------------------------------------------------------------------------

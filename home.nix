@@ -4,7 +4,6 @@
   home.username = "rickey";
   home.homeDirectory = "/home/rickey";
 
-  # Enable Zsh, custom aliases, and auto-start Hyprland on TTY1 login
   programs.zsh = {
     enable = true;
     shellAliases = {
@@ -16,7 +15,6 @@
       ls = "eza --icons";
       ll = "eza -la --icons";
       cat = "bat";
-      cd = "z";
 
       # NixOS Quick Rebuild Shortcuts
       rebuild = "sudo nixos-rebuild switch --flake ~/nixos#nixos";
@@ -28,6 +26,12 @@
         exec start-hyprland
       fi
     '';
+  };
+
+  # Native Zoxide Integration (Use 'z' to jump around without breaking standard 'cd')
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
   };
 
   # Complete User-Space Packages List
