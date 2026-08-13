@@ -1,6 +1,28 @@
 { config, pkgs, ... }:
 
 {
+  imports = [
+    ./hardware-configuration.nix
+    ./video.nix
+    ./desktop.nix
+  ];
+
+  # Bootloader Configuration
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  # Networking & Hostname
+  networking.hostName = "nixos";
+  networking.networkmanager.enable = true;
+
+  # User Account Configuration
+  users.users.rickey = {
+    isNormalUser = true;
+    description = "Rickey";
+    extraGroups = [ "networkmanager" "wheel" "video" "audio" ];
+    shell = pkgs.zsh;
+  };
+
   # ---------------------------------------------------------------------------
   # Screencasting & Desktop Portals (OBS PipeWire Fix)
   # ---------------------------------------------------------------------------
@@ -71,19 +93,13 @@
   ];
 
   # ---------------------------------------------------------------------------
-  # Gaming Optimizations & Storage Mounts
+  # Gaming Optimizations
   # ---------------------------------------------------------------------------
   programs.steam = {
     enable = true;
     gamescopeSession.enable = true;
   };
   programs.gamemode.enable = true;
-
-  fileSystems."/mnt/games" = {
-    device = "/dev/disk/by-uuid/db1a5ee4-7ab1-4b16-b41d-f23f400ec99c";
-    fsType = "ext4";
-    options = [ "defaults" "nofail" "x-gvfs-show" ];
-  };
 
   system.stateVersion = "26.05";
 }
