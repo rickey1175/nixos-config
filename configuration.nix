@@ -56,7 +56,6 @@
   security.polkit.enable = true;
   xdg.portal = {
     enable = true;
-    wlr.enable = true;
     extraPortals = [
       pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-gtk
@@ -100,14 +99,14 @@
   ];
 
   # ---------------------------------------------------------------------------
-  # System Packages Baseline
+  # System Packages Baseline (Common to All Machines)
   # ---------------------------------------------------------------------------
   nixpkgs.config.allowUnfree = true;
 
   environment.systemPackages = with pkgs; [
     # Core Editors, Shell & Tools
     vim git wget curl kitty alacritty brave discord vscode wl-clipboard pavucontrol fastfetch 
-    playerctl python3 obs-studio fzf gh
+    playerctl python3 fzf gh
 
     # Storage & Virtualization Tools
     gparted parted udisks virt-manager qemu qemu_kvm OVMF

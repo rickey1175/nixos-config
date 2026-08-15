@@ -34,7 +34,7 @@
     modesetting.enable = true;
     powerManagement.enable = false;
     powerManagement.finegrained = false;
-    open = false; # Proprietary module required for container NVENC/CUDA symbol mapping
+    open = false;
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.stable;
   };
@@ -69,4 +69,3 @@
     })
   ];
 }
-

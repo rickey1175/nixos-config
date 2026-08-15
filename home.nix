@@ -26,6 +26,9 @@
         exec Hyprland
       fi
     '';
+    initExtra = ''
+      fastfetch
+    '';
   };
 
   # Native Zoxide Integration
