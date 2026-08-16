@@ -1,6 +1,11 @@
 { config, pkgs, ... }:
 
 {
+  imports = [
+    ./hardware-configuration.nix
+    ./desktop.nix
+  ];
+
   # Bootloader Configuration
   boot.loader.systemd-boot.enable = true;
   boot.loader.efi.canTouchEfiVariables = true;
@@ -51,7 +56,7 @@
   systemd.sockets.virtqemud.enable = true;
 
   # ---------------------------------------------------------------------------
-  # Screencasting & Desktop Portals (OBS / Hyprland PipeWire Setup)
+  # Screencasting & Desktop Portals (OBS / Hyprland / KDE Setup)
   # ---------------------------------------------------------------------------
   security.polkit.enable = true;
   xdg.portal = {
@@ -59,6 +64,7 @@
     extraPortals = [
       pkgs.xdg-desktop-portal-hyprland
       pkgs.xdg-desktop-portal-gtk
+      pkgs.kdePackages.xdg-desktop-portal-kde
     ];
     config = {
       common = {
@@ -114,14 +120,19 @@
     # Desktop Ricing & GUI Stack
     waybar rofi awww waypaper dunst hyprlock hypridle hyprpolkitagent networkmanagerapplet eww cava wlogout
 
+    # KDE Service Framework & MIME Utilities (Fixes Dolphin "Open With" / File Indexing)
+    kdePackages.kio
+    kdePackages.kio-extras
+    kdePackages.kservice
+    kdePackages.frameworkintegration
+    shared-mime-info
+    desktop-file-utils
+
     # System Monitoring
     btop
 
-    # Media & File Management
-    vlc kdePackages.dolphin kdePackages.ffmpegthumbs
-
     # Container & Compression Utilities
-    podman distrobox unzip p7zip ffmpeg pciutils lshw
+    podman distrobox unzip p7zip pciutils lshw
 
     # Gaming Stack
     protonup-qt mangohud gamescope

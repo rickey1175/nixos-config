@@ -45,6 +45,7 @@ end)
 -------------------------------
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
+hl.env("XDG_DATA_DIRS", "/home/rickey/.nix-profile/share:/nix/var/nix/profiles/default/share:/run/current-system/sw/share:" .. (os.getenv("XDG_DATA_DIRS") or ""))
 
 -----------------------
 ---- LOOK AND FEEL ----

@@ -19,6 +19,37 @@
       common = {
         default = [ "hyprland" "gtk" ];
       };
+      hyprland = {
+        default = [ "hyprland" "gtk" ];
+      };
     };
   };
+
+  # ---------------------------------------------------------------------------
+  # MIME Database & Desktop File Associations (Populates "Open With" Lists)
+  # ---------------------------------------------------------------------------
+  xdg.mime.enable = true;
+
+  # ---------------------------------------------------------------------------
+  # Video Processing, Media & Desktop Applications
+  # ---------------------------------------------------------------------------
+  environment.systemPackages = with pkgs; [
+    # Video Transcoding & Encoding
+    handbrake
+    ffmpeg-full
+
+    # Media Players & Thumbnailers
+    vlc
+    kdePackages.dolphin
+    kdePackages.ffmpegthumbs
+    kdePackages.kdegraphics-thumbnailers
+
+    # Document & Office Suite
+    libreoffice-fresh
+
+    # XDG & Desktop File Database Integration
+    xdg-utils
+    shared-mime-info
+    desktop-file-utils
+  ];
 }
