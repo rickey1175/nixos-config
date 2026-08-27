@@ -18,6 +18,7 @@ hl.monitor({
 local terminal    = "kitty"
 local fileManager = "dolphin"
 local menu        = "rofi -show drun"
+local clipMenu    = "cliphist list | rofi -dmenu -p 'Clipboard' | cliphist decode | wl-copy"
 
 -------------------
 ---- AUTOSTART ----
@@ -38,6 +39,10 @@ hl.on("hyprland.start", function ()
    hl.exec_cmd("hypridle &")
    hl.exec_cmd("nm-applet --indicator &")
    hl.exec_cmd("blueman-applet &")
+
+   -- Clipboard History Daemons (Text & Images)
+   hl.exec_cmd("wl-paste --type text --watch cliphist store &")
+   hl.exec_cmd("wl-paste --type image --watch cliphist store &")
 end)
 
 -------------------------------
@@ -169,6 +174,7 @@ local mainMod = "SUPER"
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + Q",      hl.dsp.window.close())
 hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd(menu))
+hl.bind(mainMod .. " + C",      hl.dsp.exec_cmd(clipMenu))
 hl.bind(mainMod .. " + M",      hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + W",      hl.dsp.exec_cmd("waypaper"))
@@ -176,6 +182,10 @@ hl.bind(mainMod .. " + V",      hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + P",      hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J",      hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + F",      hl.dsp.window.fullscreen())
+
+-- Screenshots & Annotations (Grim + Slurp + Swappy)
+hl.bind("Print",         hl.dsp.exec_cmd('grim -g "$(slurp)" - | swappy -f -'))
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
 
 -- Lock Screen Shortcut
 hl.bind(mainMod .. " + L", hl.dsp.exec_cmd('nohup bash -c "while pgrep hyprlock > /dev/null; do ~/.config/hypr/scripts/get_cover.sh; sleep 2; done" >/dev/null 2>&1 & hyprlock'))
@@ -250,6 +260,30 @@ hl.window_rule({
     match   = { class = "discord" },
     opacity = 0.80,
 })
+hl.window_rule({
+    name    = "gimp-opacity",
+    match   = { class = "^(Gimp|gimp-.*)$" },
+    opacity = 0.88,
+})
+
+-- Creative & Utility Floating Dialogs
+hl.window_rule({
+    name    = "swappy-float",
+    match   = { class = "swappy" },
+    float   = true,
+})
+hl.window_rule({
+    name    = "piper-float",
+    match   = { class = "ratbag-piper|piper" },
+    float   = true,
+})
+hl.window_rule({
+    name    = "goverlay-float",
+    match   = { class = "goverlay" },
+    float   = true,
+})
+
+-- Hyprland Core Window Rules
 hl.window_rule({
     name           = "suppress-maximize-events",
     match          = { class = ".*" },
