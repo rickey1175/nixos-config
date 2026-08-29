@@ -50,7 +50,7 @@
 
     # Wallpaper Daemons
     hyprpaper
-    awww
+    swww
     swaybg
 
     # Terminal UI & CLI Utilities
@@ -95,6 +95,8 @@
   xdg.configFile."kitty".source = ./kitty;
   xdg.configFile."waybar".source = ./waybar;
   xdg.configFile."rofi".source = ./rofi;
+  xdg.configFile."waypaper".source = ./waypaper;
+  xdg.configFile."cava".source = ./cava;
 
-  home.stateVersion = "24.05";
+  home.stateVersion = "26.05";
 }
