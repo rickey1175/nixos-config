@@ -19,6 +19,7 @@ local terminal    = "kitty"
 local fileManager = "dolphin"
 local menu        = "rofi -show drun"
 local clipMenu    = "cliphist list | rofi -dmenu -p 'Clipboard' | cliphist decode | wl-copy"
+local obsApp      = "env QT_QPA_PLATFORM=wayland obs"
 
 -------------------
 ---- AUTOSTART ----
@@ -70,7 +71,7 @@ hl.config({
        layout = "dwindle",
    },
    decoration = {
-       rounding       = 12,
+       rounding         = 12,
        -- Dialed up global window transparency
        active_opacity   = 0.78,
        inactive_opacity = 0.65,
@@ -178,6 +179,7 @@ hl.bind(mainMod .. " + C",      hl.dsp.exec_cmd(clipMenu))
 hl.bind(mainMod .. " + M",      hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd(fileManager))
 hl.bind(mainMod .. " + W",      hl.dsp.exec_cmd("waypaper"))
+hl.bind(mainMod .. " + O",      hl.dsp.exec_cmd(obsApp))
 hl.bind(mainMod .. " + V",      hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mainMod .. " + P",      hl.dsp.window.pseudo())
 hl.bind(mainMod .. " + J",      hl.dsp.layout("togglesplit"))
@@ -264,6 +266,11 @@ hl.window_rule({
     name    = "gimp-opacity",
     match   = { class = "^(Gimp|gimp-.*)$" },
     opacity = 0.88,
+})
+hl.window_rule({
+    name    = "obs-opacity",
+    match   = { class = "com.obsproject.Studio" },
+    opacity = 0.85,
 })
 
 -- Creative & Utility Floating Dialogs
