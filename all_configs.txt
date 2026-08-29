@@ -1,0 +1,1016 @@
+{
+  description = "NixOS Flake Configuration";
+
+  inputs = {
+    nixpkgs.url = "github:nixos/nixpkgs/nixos-unstable";
+    home-manager = {
+      url = "github:nix-community/home-manager";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = { self, nixpkgs, home-manager, ... }@inputs: {
+    nixosConfigurations = {
+      # Main Desktop Rig (NVIDIA + Desktop Hardware)
+      nixos = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./hardware-configuration.nix
+          ./video.nix
+          ./configuration.nix
+          ./desktop.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.users.rickey = import ./home.nix;
+          }
+        ];
+      };
+
+      # Laptop Setup (Intel Only)
+      laptop = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          ./laptop-hardware.nix
+          ./configuration.nix
+          ./laptop.nix
+          home-manager.nixosModules.home-manager
+          {
+            home-manager.useGlobalPkgs = true;
+            home-manager.useUserPackages = true;
+            home-manager.backupFileExtension = "backup";
+            home-manager.users.rickey = import ./home.nix;
+          }
+        ];
+      };
+    };
+  };
+}{ config, pkgs, ... }:
+
+{
+  # ---------------------------------------------------------------------------
+  # Bootloader Configuration
+  # ---------------------------------------------------------------------------
+  boot.loader.systemd-boot.enable = true;
+  boot.loader.efi.canTouchEfiVariables = true;
+
+  # ---------------------------------------------------------------------------
+  # Networking & Time Sync
+  # ---------------------------------------------------------------------------
+  networking.hostName = "nixos";
+  networking.networkmanager.enable = true;
+  time.timeZone = "America/New_York";
+  services.timesyncd.enable = true;
+
+  # ---------------------------------------------------------------------------
+  # Experimental Nix Features & Unfree License Support
+  # ---------------------------------------------------------------------------
+  nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nixpkgs.config.allowUnfree = true;
+
+  # ---------------------------------------------------------------------------
+  # System Shell, Hyprland & Keybindings
+  # ---------------------------------------------------------------------------
+  programs.zsh.enable = true;
+  programs.hyprland.enable = true;
+  programs.fzf = {
+    keybindings = true;
+    fuzzyCompletion = true;
+  };
+
+  # ---------------------------------------------------------------------------
+  # User Account Configuration
+  # ---------------------------------------------------------------------------
+  users.users.rickey = {
+    isNormalUser = true;
+    description = "rickey";
+    extraGroups = [ "networkmanager" "wheel" "video" "audio" "libvirtd" "kvm" ];
+    shell = pkgs.zsh;
+  };
+
+  # Automatic TTY1 Login
+  services.getty.autologinUser = "rickey";
+
+  # ---------------------------------------------------------------------------
+  # Virtualization & Container Services
+  # ---------------------------------------------------------------------------
+  virtualisation.libvirtd = {
+    enable = true;
+    qemu = {
+      package = pkgs.qemu_kvm;
+      runAsRoot = true;
+      swtpm.enable = true;
+    };
+  };
+  programs.virt-manager.enable = true;
+
+  # Force socket activation so virt-manager auto-detects qemu:///system
+  systemd.services.libvirtd.wantedBy = [ "multi-user.target" ];
+  systemd.sockets.virtqemud.enable = true;
+
+  # ---------------------------------------------------------------------------
+  # Screencasting & Unified Desktop Portals
+  # ---------------------------------------------------------------------------
+  security.polkit.enable = true;
+  xdg.portal = {
+    enable = true;
+    extraPortals = [
+      pkgs.xdg-desktop-portal-hyprland
+      pkgs.xdg-desktop-portal-gtk
+      pkgs.kdePackages.xdg-desktop-portal-kde
+    ];
+    config = {
+      common = {
+        default = [ "hyprland" "gtk" ];
+      };
+      hyprland = {
+        default = [ "hyprland" "gtk" ];
+      };
+    };
+  };
+
+  # ---------------------------------------------------------------------------
+  # Audio & Bluetooth
+  # ---------------------------------------------------------------------------
+  services.pulseaudio.enable = false;
+  security.rtkit.enable = true;
+  services.pipewire = {
+    enable = true;
+    alsa.enable = true;
+    alsa.support32Bit = true;
+    pulse.enable = true;
+    wireplumber.enable = true;
+  };
+
+  hardware.bluetooth = {
+    enable = true;
+    powerOnBoot = true;
+  };
+  services.blueman.enable = true;
+
+  # ---------------------------------------------------------------------------
+  # Font Configuration
+  # ---------------------------------------------------------------------------
+  fonts.packages = with pkgs; [
+    font-awesome
+    nerd-fonts.jetbrains-mono
+    nerd-fonts.symbols-only
+  ];
+
+  # ---------------------------------------------------------------------------
+  # Base System Packages (Shared Across Desktop & Laptop)
+  # ---------------------------------------------------------------------------
+  environment.systemPackages = with pkgs; [
+    # Core Editors, Shell & Terminal Tools
+    vim
+    git
+    wget
+    curl
+    kitty
+    alacritty
+    discord
+    vscode
+    python3
+    gh
+    tmux
+    zellij
+    lazygit
+
+    # Creative & Media Stack
+    gimp
+    inkscape
+    audacity
+    imagemagick
+
+    # Wayland & Desktop Quality-of-Life
+    grim
+    slurp
+    swappy
+    wf-recorder
+    cliphist
+    brightnessctl
+
+    # Storage & Virtualization Tools
+    gparted
+    parted
+    udisks
+    virt-manager
+    qemu
+    qemu_kvm
+    OVMF
+
+    # Desktop Ricing & GUI Stack
+    waybar
+    rofi
+    dunst
+    hyprlock
+    hypridle
+    hyprpolkitagent
+    networkmanagerapplet
+    eww
+    wlogout
+
+    # KDE Service Framework & MIME Utilities
+    kdePackages.kio
+    kdePackages.kio-extras
+    kdePackages.kservice
+    kdePackages.frameworkintegration
+    shared-mime-info
+    desktop-file-utils
+
+    # System & Hardware Inspection
+    pciutils
+    lshw
+
+    # Containers
+    podman
+    distrobox
+
+    # Gaming Stack & Utilities
+    protonup-qt
+    mangohud
+    gamescope
+    lutris
+    heroic
+    piper
+    goverlay
+  ];
+
+  # ---------------------------------------------------------------------------
+  # Gaming Optimizations & System Fixes
+  # ---------------------------------------------------------------------------
+  programs.steam = {
+    enable = true;
+    gamescopeSession.enable = true;
+  };
+  programs.gamemode.enable = true;
+
+  # Allow user FUSE mounts
+  programs.fuse.userAllowOther = true;
+
+  system.stateVersion = "26.05";
+}{ config, pkgs, ... }:
+
+{
+  # ---------------------------------------------------------------------------
+  # Dedicated Game Storage Mount (Desktop NVMe)
+  # ---------------------------------------------------------------------------
+  fileSystems."/mnt/games" = {
+    device = "/dev/disk/by-uuid/db1a5ee4-7ab1-4b16-b41d-f23f400ec99c";
+    fsType = "ext4";
+    options = [ "defaults" "nofail" "x-gvfs-show" ];
+  };
+
+  # MIME Database & Desktop File Associations
+  xdg.mime.enable = true;
+
+  # ---------------------------------------------------------------------------
+  # Desktop Applications & Media Utilities
+  # ---------------------------------------------------------------------------
+  environment.systemPackages = with pkgs; [
+    handbrake
+    ffmpeg-full
+    vlc
+    kdePackages.dolphin
+    kdePackages.ffmpegthumbs
+    kdePackages.kdegraphics-thumbnailers
+    libreoffice-fresh
+    xdg-utils
+  ];
+}{ config, pkgs, ... }:
+
+{
+  # Power Management & Thermal Daemons
+  services.tlp.enable = true;
+  services.thermald.enable = true;
+
+  # Wrapped OBS Studio for Intel QuickSync / Wayland PipeWire
+  environment.systemPackages = with pkgs; [
+    (wrapOBS.override {
+      obs-studio = pkgs.obs-studio;
+    } {
+      plugins = with pkgs.obs-studio-plugins; [
+        wlrobs
+        obs-pipewire-audio-capture
+        obs-vkcapture
+      ];
+    })
+  ];
+}{ config, pkgs, lib, ... }:
+
+{
+  home.username = "rickey";
+  home.homeDirectory = lib.mkForce "/home/rickey";
+
+  # ---------------------------------------------------------------------------
+  # Zsh Configuration & Shell Aliases
+  # ---------------------------------------------------------------------------
+  programs.zsh = {
+    enable = true;
+    shellAliases = {
+      # File Manager Shortcuts
+      fm = "yazi";
+      filemanager = "dolphin . &";
+
+      # Core Replacements
+      ls = "eza --icons";
+      ll = "eza -la --icons";
+      cat = "bat";
+
+      # NixOS Quick Shortcuts
+      rebuild = "sudo nixos-rebuild switch --flake ~/nixos#nixos";
+      nc = "cd ~/nixos && nvim configuration.nix";
+      nh = "cd ~/nixos && nvim home.nix";
+    };
+    profileExtra = ''
+      if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
+        exec Hyprland
+      fi
+    '';
+    initExtra = ''
+      fastfetch
+    '';
+  };
+
+  # Native Zoxide Integration
+  programs.zoxide = {
+    enable = true;
+    enableZshIntegration = true;
+  };
+
+  # ---------------------------------------------------------------------------
+  # User-Space Packages
+  # ---------------------------------------------------------------------------
+  home.packages = with pkgs; [
+    # GUI Applications
+    brave
+    waypaper
+
+    # Wallpaper Daemons
+    hyprpaper
+    swww
+    swaybg
+
+    # Terminal UI & CLI Utilities
+    yazi
+    fzf
+    eza
+    bat
+    zoxide
+    cava
+    fastfetch
+    btop
+    pavucontrol
+    ripgrep
+    fd
+    jq
+    unzip
+    p7zip
+    wl-clipboard
+    playerctl
+
+    # Declarative Portal Fix Script
+    (writeShellScriptBin "fix-portal" ''
+      ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE
+      ${pkgs.systemd}/bin/systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE
+      
+      # Kill any stuck portal instances
+      pkill -f xdg-desktop-portal || true
+      
+      # Restart the Hyprland backend
+      ${pkgs.systemd}/bin/systemctl --user restart xdg-desktop-portal-hyprland
+      sleep 1
+      
+      # Try starting via systemctl, or fallback to direct execution
+      ${pkgs.systemd}/bin/systemctl --user start xdg-desktop-portal 2>/dev/null || ${pkgs.xdg-desktop-portal}/libexec/xdg-desktop-portal &
+    '')
+  ];
+
+  # ---------------------------------------------------------------------------
+  # Dotfile Symlinks
+  # ---------------------------------------------------------------------------
+  xdg.configFile."hypr".source = ./hypr;
+  xdg.configFile."kitty".source = ./kitty;
+  xdg.configFile."waybar".source = ./waybar;
+  xdg.configFile."rofi".source = ./rofi;
+  xdg.configFile."waypaper".source = ./waypaper;
+  xdg.configFile."cava".source = ./cava;
+
+  home.stateVersion = "26.05";
+}-- -----------------------------------------------------------------------------
+-- HYPRLAND LUA CONFIGURATION (V8 - INCREASED TRANSPARENCY + HELLDIVERS GRADIENT)
+-- -----------------------------------------------------------------------------
+
+------------------
+---- MONITORS ----
+------------------
+hl.monitor({
+   output   = "",
+   mode     = "preferred",
+   position = "auto",
+   scale    = "auto",
+})
+
+---------------------
+---- MY PROGRAMS ----
+---------------------
+local terminal    = "kitty"
+local fileManager = "dolphin"
+local menu        = "rofi -show drun"
+local clipMenu    = "cliphist list | rofi -dmenu -p 'Clipboard' | cliphist decode | wl-copy"
+local obsApp      = "env QT_QPA_PLATFORM=wayland obs"
+
+-------------------
+---- AUTOSTART ----
+-------------------
+hl.on("hyprland.start", function ()
+   -- Import environment variables into DBus and systemd
+   hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE &")
+
+   -- Signal systemd that the graphical session is active
+   hl.exec_cmd("systemctl --user start graphical-session.target &")
+
+   -- Declarative Portal Fix (Restarts xdg-desktop-portal cleanly)
+   hl.exec_cmd("fix-portal &")
+
+   -- Core Desktop Daemons & Applets
+   hl.exec_cmd("waybar &")
+   hl.exec_cmd("swww-daemon & sleep 0.5 && waypaper --restore &")
+   hl.exec_cmd("hypridle &")
+   hl.exec_cmd("nm-applet --indicator &")
+   hl.exec_cmd("blueman-applet &")
+
+   -- Clipboard History Daemons (Text & Images)
+   hl.exec_cmd("wl-paste --type text --watch cliphist store &")
+   hl.exec_cmd("wl-paste --type image --watch cliphist store &")
+end)
+
+-------------------------------
+---- ENVIRONMENT VARIABLES ----
+-------------------------------
+hl.env("XCURSOR_SIZE", "24")
+hl.env("HYPRCURSOR_SIZE", "24")
+hl.env("XDG_DATA_DIRS", "/home/rickey/.nix-profile/share:/nix/var/nix/profiles/default/share:/run/current-system/sw/share:" .. (os.getenv("XDG_DATA_DIRS") or ""))
+
+-----------------------
+---- LOOK AND FEEL ----
+-----------------------
+hl.config({
+   general = {
+       gaps_in  = 5,
+       gaps_out = 10,
+       border_size = 2,
+       col = {
+           -- Helldivers Gold (#FFE135) Top -> Stratagem Blue (#00E5FF) Bottom at 180deg
+           active_border   = { colors = {"rgba(FFE135ee)", "rgba(00E5FFee)"}, angle = 180 },
+           inactive_border = "rgba(12263aaa)",
+       },
+       resize_on_border = true,
+       allow_tearing = false,
+       layout = "dwindle",
+   },
+   decoration = {
+       rounding         = 12,
+       -- Dialed up global window transparency
+       active_opacity   = 0.78,
+       inactive_opacity = 0.65,
+       blur = {
+           enabled   = true,
+           size      = 10,
+           passes    = 3,
+           vibrancy  = 0.1696,
+       },
+   },
+   animations = {
+       enabled = true,
+   },
+})
+
+-- Bezier Curves & Springs
+hl.curve("easeOutQuint",   { type = "bezier", points = { {0.23, 1},    {0.32, 1}    } })
+hl.curve("easeInOutCubic", { type = "bezier", points = { {0.65, 0.05}, {0.36, 1}    } })
+hl.curve("linear",         { type = "bezier", points = { {0, 0},       {1, 1}       } })
+hl.curve("almostLinear",   { type = "bezier", points = { {0.5, 0.5},   {0.75, 1}    } })
+hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1}     } })
+hl.curve("easy",           { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
+
+-- Animations
+hl.animation({ leaf = "global",        enabled = true,  speed = 10,   bezier = "default" })
+hl.animation({ leaf = "border",        enabled = true,  speed = 5.39, bezier = "easeOutQuint" })
+hl.animation({ leaf = "windows",       enabled = true,  speed = 4.79, spring = "easy" })
+hl.animation({ leaf = "windowsIn",     enabled = true,  speed = 4.1,  spring = "easy",         style = "popin 87%" })
+hl.animation({ leaf = "windowsOut",    enabled = true,  speed = 1.49, bezier = "linear",       style = "popin 87%" })
+hl.animation({ leaf = "fadeIn",        enabled = true,  speed = 1.73, bezier = "almostLinear" })
+hl.animation({ leaf = "fadeOut",       enabled = true,  speed = 1.46, bezier = "almostLinear" })
+hl.animation({ leaf = "fade",          enabled = true,  speed = 3.03, bezier = "quick" })
+hl.animation({ leaf = "layers",        enabled = true,  speed = 3.81, bezier = "easeOutQuint" })
+hl.animation({ leaf = "layersIn",      enabled = true,  speed = 4,    bezier = "easeOutQuint", style = "fade" })
+hl.animation({ leaf = "layersOut",     enabled = true,  speed = 1.5,  bezier = "linear",       style = "fade" })
+hl.animation({ leaf = "fadeLayersIn",  enabled = true,  speed = 1.79, bezier = "almostLinear" })
+hl.animation({ leaf = "fadeLayersOut", enabled = true,  speed = 1.39, bezier = "almostLinear" })
+hl.animation({ leaf = "workspaces",    enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
+hl.animation({ leaf = "workspacesIn",  enabled = true,  speed = 1.21, bezier = "almostLinear", style = "fade" })
+hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
+hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "quick" })
+
+-----------------
+---- LAYOUTS ----
+-----------------
+hl.config({
+   dwindle = {
+       preserve_split = true,
+   },
+   master = {
+       new_status = "master",
+   },
+   scrolling = {
+       fullscreen_on_one_column = true,
+   },
+})
+
+--------------
+---- MISC ----
+--------------
+hl.config({
+   misc = {
+       force_default_wallpaper = -1,
+       disable_hyprland_logo   = false,
+   },
+})
+
+---------------
+---- INPUT ----
+---------------
+hl.config({
+   input = {
+       kb_layout    = "us",
+       kb_variant   = "",
+       kb_model     = "",
+       kb_options   = "",
+       kb_rules     = "",
+       follow_mouse = 1,
+       sensitivity  = 0,
+       touchpad     = {
+           natural_scroll = false,
+       },
+   },
+})
+hl.gesture({
+   fingers   = 3,
+   direction = "horizontal",
+   action    = "workspace"
+})
+hl.device({
+   name        = "epic-mouse-v1",
+   sensitivity = -0.5,
+})
+
+---------------------
+---- KEYBINDINGS ----
+---------------------
+local mainMod = "SUPER"
+
+-- Application Binds
+hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
+hl.bind(mainMod .. " + Q",      hl.dsp.window.close())
+hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd(menu))
+hl.bind(mainMod .. " + C",      hl.dsp.exec_cmd(clipMenu))
+hl.bind(mainMod .. " + M",      hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
+hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd(fileManager))
+hl.bind(mainMod .. " + W",      hl.dsp.exec_cmd("waypaper"))
+hl.bind(mainMod .. " + O",      hl.dsp.exec_cmd(obsApp))
+hl.bind(mainMod .. " + V",      hl.dsp.window.float({ action = "toggle" }))
+hl.bind(mainMod .. " + P",      hl.dsp.window.pseudo())
+hl.bind(mainMod .. " + J",      hl.dsp.layout("togglesplit"))
+hl.bind(mainMod .. " + F",      hl.dsp.window.fullscreen())
+
+-- Screenshots & Annotations (Grim + Slurp + Swappy)
+hl.bind("Print",         hl.dsp.exec_cmd('grim -g "$(slurp)" - | swappy -f -'))
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
+
+-- Lock Screen Shortcut
+hl.bind(mainMod .. " + L", hl.dsp.exec_cmd('nohup bash -c "while pgrep hyprlock > /dev/null; do ~/.config/hypr/scripts/get_cover.sh; sleep 2; done" >/dev/null 2>&1 & hyprlock'))
+
+-- Focus Movement
+hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
+hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
+hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
+hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
+
+-- Move Active Window Around (Keyboard)
+hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left" }))
+hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
+hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.move({ direction = "up" }))
+hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.move({ direction = "down" }))
+
+-- Workspaces Navigation & Moving Windows
+for i = 1, 10 do
+   local key = i % 10
+   hl.bind(mainMod .. " + " .. key,         hl.dsp.focus({ workspace = i }))
+   hl.bind(mainMod .. " + SHIFT + " .. key, hl.dsp.window.move({ workspace = i }))
+end
+
+-- Special Workspace (Scratchpad)
+hl.bind(mainMod .. " + S",         hl.dsp.workspace.toggle_special("magic"))
+hl.bind(mainMod .. " + SHIFT + S", hl.dsp.window.move({ workspace = "special:magic" }))
+
+-- Mouse Workspaces & Window Drag/Resize
+hl.bind(mainMod .. " + mouse_down", hl.dsp.focus({ workspace = "e+1" }))
+hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
+hl.bind(mainMod .. " + mouse:272",  hl.dsp.window.drag(),   { mouse = true })
+hl.bind(mainMod .. " + mouse:273",  hl.dsp.window.resize(), { mouse = true })
+
+-- Audio & Volume Controls
+hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
+hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      { locked = true, repeating = true })
+hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true, repeating = true })
+hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, repeating = true })
+
+-- Screen Brightness
+hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), { locked = true, repeating = true })
+hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), { locked = true, repeating = true })
+
+-- Media Player Controls
+hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })
+hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
+
+--------------------------------
+---- WINDOWS AND WORKSPACES ----
+--------------------------------
+
+-- App Specific Transparency Rules via hl.window_rule API
+hl.window_rule({
+    name    = "kitty-opacity",
+    match   = { class = "kitty" },
+    opacity = 0.72,
+})
+hl.window_rule({
+    name    = "vscode-opacity",
+    match   = { class = "^(Code|code-url-handler|VSCode)$" },
+    opacity = 0.80,
+})
+hl.window_rule({
+    name    = "dolphin-opacity",
+    match   = { class = "org.kde.dolphin" },
+    opacity = 0.78,
+})
+hl.window_rule({
+    name    = "discord-opacity",
+    match   = { class = "discord" },
+    opacity = 0.80,
+})
+hl.window_rule({
+    name    = "gimp-opacity",
+    match   = { class = "^(Gimp|gimp-.*)$" },
+    opacity = 0.88,
+})
+hl.window_rule({
+    name    = "obs-opacity",
+    match   = { class = "com.obsproject.Studio" },
+    opacity = 0.85,
+})
+
+-- Creative & Utility Floating Dialogs
+hl.window_rule({
+    name    = "swappy-float",
+    match   = { class = "swappy" },
+    float   = true,
+})
+hl.window_rule({
+    name    = "piper-float",
+    match   = { class = "ratbag-piper|piper" },
+    float   = true,
+})
+hl.window_rule({
+    name    = "goverlay-float",
+    match   = { class = "goverlay" },
+    float   = true,
+})
+
+-- Hyprland Core Window Rules
+hl.window_rule({
+    name           = "suppress-maximize-events",
+    match          = { class = ".*" },
+    suppress_event = "maximize",
+})
+hl.window_rule({
+   name = "fix-xwayland-drags",
+   match = {
+       class      = "^$",
+       title      = "^$",
+       xwayland   = true,
+       float      = true,
+       fullscreen = false,
+       pin        = false,
+   },
+   no_focus = true,
+})
+hl.window_rule({
+   name  = "move-hyprland-run",
+   match = { class = "hyprland-run" },
+   move  = "20 monitor_h-120",
+   float = true,
+}){
+    "layer": "top",
+    "position": "top",
+    "height": 38,
+    "spacing": 4,
+
+    "modules-left": [
+        "hyprland/workspaces",
+        "wlr/taskbar",
+        "cpu",
+        "custom/gpu",
+        "memory"
+    ],
+    "modules-center": [
+        "custom/media"
+    ],
+    "modules-right": [
+        "pulseaudio",
+        "bluetooth",
+        "network",
+        "clock",
+        "tray"
+    ],
+
+    "hyprland/workspaces": {
+        "disable-scroll": true,
+        "all-outputs": true,
+        "active-only": false,
+        "on-click": "activate",
+        "format": "{name}",
+        "persistent-workspaces": {
+            "*": 5
+        }
+    },
+
+    "wlr/taskbar": {
+        "format": "{icon}",
+        "icon-size": 18,
+        "icon-theme": "Numix-Circle",
+        "tooltip-format": "{title}",
+        "on-click": "activate",
+        "on-click-middle": "close"
+    },
+
+    "cpu": {
+        "format": "󰍛 {usage}%",
+        "interval": 2,
+        "tooltip": true
+    },
+
+    "custom/gpu": {
+        "exec": "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits 2>/dev/null || echo 0",
+        "format": "󰢮 {}%",
+        "interval": 2,
+        "tooltip": false
+    },
+
+    "memory": {
+        "format": "󰘚 {percentage}%",
+        "interval": 2,
+        "tooltip-format": "RAM: {used:0.1f}GiB / {total:0.1f}GiB"
+    },
+
+    "custom/media": {
+        "format": "{}",
+        "return-type": "json",
+        "exec": "~/.config/waybar/scripts/mediaplayer.py",
+        "on-click": "playerctl play-pause",
+        "markup": "pango"
+    },
+
+    "clock": {
+        "format": "{:%I:%M %p}",
+        "tooltip-format": "<big>{:%Y %B}</big>\n<tt><small>{calendar}</small></tt>"
+    },
+
+    "pulseaudio": {
+        "format": "{icon} {volume}%",
+        "format-muted": "󰝟 Muted",
+        "format-icons": {
+            "default": ["󰕿", "󰖀", "󰕾"]
+        },
+        "on-click": "pavucontrol"
+    },
+
+    "bluetooth": {
+        "format": "󰂯",
+        "format-connected": "󰂱",
+        "format-disabled": "󰂲",
+        "on-click": "blueman-manager"
+    },
+
+    "network": {
+        "format-wifi": "󰤨 {essid}",
+        "format-ethernet": "󰈀 Ethernet",
+        "format-disconnected": "󰤭 Disconnected",
+        "on-click": "nm-connection-editor"
+    },
+
+    "tray": {
+        "spacing": 10
+    }
+}* {
+    border: none;
+    border-radius: 0;
+    font-family: "JetBrainsMono Nerd Font", Roboto, Helvetica, Arial, sans-serif;
+    font-size: 13px;
+    min-height: 0;
+}
+
+window#waybar {
+    background-color: rgba(10, 22, 36, 0.65);
+    color: #cdd6f4;
+    transition-property: background-color;
+    transition-duration: .5s;
+}
+
+/* Entire Workspaces Outer Pill Container */
+#workspaces {
+    background-color: rgba(18, 38, 58, 0.75);
+    border: 1px solid rgba(0, 180, 216, 0.35);
+    border-radius: 12px;
+    padding: 0 4px;
+    margin: 4px 2px;
+}
+
+/* Individual Workspace Buttons */
+#workspaces button {
+    padding: 0 8px;
+    background-color: transparent;
+    color: #FF2A2A; /* Helldivers Stratagem Red for inactive numbers */
+    border-radius: 8px;
+    margin: 2px 1px;
+    font-weight: bold;
+}
+
+/* Active Selected Workspace Pill Inside */
+#workspaces button.active {
+    background-color: rgba(0, 180, 216, 0.35);
+    border: 1px solid rgba(0, 180, 216, 0.6);
+    color: #FFE800; /* Helldivers Yellow for active number */
+}
+
+#workspaces button:hover {
+    background-color: rgba(255, 42, 42, 0.2);
+    color: #ffffff;
+}
+
+/* Application Taskbar Icons Container */
+#taskbar {
+    background-color: rgba(18, 38, 58, 0.75);
+    border: 1px solid rgba(0, 180, 216, 0.35);
+    border-radius: 12px;
+    padding: 0 6px;
+    margin: 4px 4px;
+}
+
+#taskbar button {
+    padding: 0 4px;
+    border-radius: 8px;
+}
+
+#taskbar button.active {
+    background-color: rgba(0, 180, 216, 0.3);
+}
+
+/* Hardware Stats Cluster (CPU, GPU, RAM) */
+#cpu,
+#custom-gpu,
+#memory {
+    background-color: rgba(18, 38, 58, 0.75);
+    border: 1px solid rgba(0, 180, 216, 0.35);
+    color: #FFE800;
+    border-radius: 12px;
+    padding: 0 10px;
+    margin: 4px 2px;
+}
+
+/* Center Media Player Module (Helldivers Yellow Pill) */
+#mpris {
+    background-color: rgba(18, 38, 58, 0.85);
+    border: 1px solid #FFE800;
+    color: #FFE800;
+    border-radius: 12px;
+    padding: 0 12px;
+    margin: 4px 2px;
+    font-weight: bold;
+}
+
+#mpris.paused {
+    color: #a6adc8;
+    border: 1px solid rgba(0, 180, 216, 0.35);
+}
+
+/* Cava Visualizer Module */
+#cava {
+    background-color: rgba(18, 38, 58, 0.75);
+    border: 1px solid rgba(0, 180, 216, 0.35);
+    color: #00B4D8;
+    border-radius: 12px;
+    padding: 0 10px;
+    margin: 4px 2px;
+}
+
+/* Right-Side Status Modules */
+#pulseaudio,
+#bluetooth,
+#network,
+#clock,
+#tray {
+    background-color: rgba(18, 38, 58, 0.75);
+    border: 1px solid rgba(0, 180, 216, 0.35);
+    color: #cdd6f4;
+    border-radius: 12px;
+    padding: 0 10px;
+    margin: 4px 2px;
+}
+
+#clock {
+    color: #FFE800;
+}
+
+/* Power Button Module */
+#custom-power {
+    background-color: rgba(18, 38, 58, 0.85);
+    border: 1px solid #FF2A2A;
+    color: #FF2A2A;
+    border-radius: 12px;
+    padding: 0 10px;
+    margin: 4px 2px;
+    font-weight: bold;
+}
+
+#custom-power:hover {
+    background-color: #FF2A2A;
+    color: #0a1624;
+}cat << 'EOF' > ~/.config/kitty/kitty.conf
+# =========================================================================
+# KITTY CONFIGURATION (HELLDIVERS TACTICAL AMBER)
+# =========================================================================
+
+# --- Shell Integration ---
+shell_integration enabled
+
+# --- Font Config ---
+font_family      JetBrainsMono Nerd Font
+bold_font        auto
+italic_font      auto
+bold_italic_font auto
+font_size        11.0
+
+# --- Window Layout & Transparency ---
+background_opacity 0.72
+window_padding_width 14
+confirm_os_window_close 0
+enable_audio_bell no
+
+# --- Cursor Customization ---
+cursor_shape beam
+cursor_blink_interval 0.4
+cursor #FFE135
+
+# --- Color Scheme (Super Earth Gold & High-Tech Carbon) ---
+foreground           #FFE135
+background           #0B0E14
+selection_foreground #0B0E14
+selection_background #FFCC00
+
+# Black / Grey
+color0 #151921
+color8 #4A5568
+
+# Red / Warning Crimson
+color1 #FF3344
+color9 #FF5566
+
+# Green / Tactical Lime
+color2  #00FF88
+color10 #33FF99
+
+# Yellow / Helldivers Super Gold
+color3  #FFE135
+color11 #FFF066
+
+# Blue / Stratagem Tactical Cyan
+color4  #00E5FF
+color12 #33EBFF
+
+# Purple / Hazard Magenta
+color5  #D946EF
+color13 #E879F9
+
+# Cyan / Data Blue
+color6  #38BDF8
+color14 #7DD3FC
+
+# White / Crisp Radar Text
+color7  #E2E8F0
+color15 #FFFFFF
+EOF

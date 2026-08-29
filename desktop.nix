@@ -23,7 +23,7 @@
     kdePackages.dolphin
     kdePackages.ffmpegthumbs
     kdePackages.kdegraphics-thumbnailers
-    libreoffice-fresh
+    libreoffice-stable
     xdg-utils
   ];
 }

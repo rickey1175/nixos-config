@@ -29,7 +29,7 @@
         exec Hyprland
       fi
     '';
-    initExtra = ''
+    initContent = ''
       fastfetch
     '';
   };
@@ -50,7 +50,7 @@
 
     # Wallpaper Daemons
     hyprpaper
-    swww
+    awww
     swaybg
 
     # Terminal UI & CLI Utilities

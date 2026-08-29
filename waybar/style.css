@@ -74,8 +74,8 @@ window#waybar {
     margin: 4px 2px;
 }
 
-/* Center Media Player Module (Helldivers Yellow Pill) */
-#mpris {
+/* Center Media Player Module (Matches config.jsonc) */
+#custom-media {
     background-color: rgba(18, 38, 58, 0.85);
     border: 1px solid #FFE800;
     color: #FFE800;
@@ -83,11 +83,6 @@ window#waybar {
     padding: 0 12px;
     margin: 4px 2px;
     font-weight: bold;
-}
-
-#mpris.paused {
-    color: #a6adc8;
-    border: 1px solid rgba(0, 180, 216, 0.35);
 }
 
 /* Cava Visualizer Module */
