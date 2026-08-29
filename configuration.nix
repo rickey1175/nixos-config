@@ -1,11 +1,6 @@
 { config, pkgs, ... }:
 
 {
-  imports = [
-    ./hardware-configuration.nix
-    ./desktop.nix
-  ];
-
   # ---------------------------------------------------------------------------
   # Bootloader Configuration
   # ---------------------------------------------------------------------------
@@ -21,12 +16,13 @@
   services.timesyncd.enable = true;
 
   # ---------------------------------------------------------------------------
-  # Experimental Nix Features
+  # Experimental Nix Features & Unfree License Support
   # ---------------------------------------------------------------------------
   nix.settings.experimental-features = [ "nix-command" "flakes" ];
+  nixpkgs.config.allowUnfree = true;
 
   # ---------------------------------------------------------------------------
-  # System-Level Shell, Hyprland & Keybindings
+  # System Shell, Hyprland & Keybindings
   # ---------------------------------------------------------------------------
   programs.zsh.enable = true;
   programs.hyprland.enable = true;
@@ -41,7 +37,7 @@
   users.users.rickey = {
     isNormalUser = true;
     description = "rickey";
-    extraGroups = [ "networkmanager" "wheel" "video" "audio" "libvirtd" ];
+    extraGroups = [ "networkmanager" "wheel" "video" "audio" "libvirtd" "kvm" ];
     shell = pkgs.zsh;
   };
 
@@ -61,12 +57,12 @@
   };
   programs.virt-manager.enable = true;
 
-  # Force socket activation for virt-manager
+  # Force socket activation so virt-manager auto-detects qemu:///system
   systemd.services.libvirtd.wantedBy = [ "multi-user.target" ];
   systemd.sockets.virtqemud.enable = true;
 
   # ---------------------------------------------------------------------------
-  # Screencasting & Desktop Portals
+  # Screencasting & Unified Desktop Portals
   # ---------------------------------------------------------------------------
   security.polkit.enable = true;
   xdg.portal = {
@@ -115,10 +111,8 @@
   ];
 
   # ---------------------------------------------------------------------------
-  # Proprietary Packages & Baseline System Packages
+  # Base System Packages (Shared Across Desktop & Laptop)
   # ---------------------------------------------------------------------------
-  nixpkgs.config.allowUnfree = true;
-
   environment.systemPackages = with pkgs; [
     # Core Editors, Shell & Terminal Tools
     vim
@@ -127,29 +121,19 @@
     curl
     kitty
     alacritty
-    brave
     discord
     vscode
-    wl-clipboard
-    pavucontrol
-    fastfetch
-    playerctl
     python3
-    fzf
     gh
-    eza
-    bat
-    ripgrep
-    lazygit
     tmux
     zellij
+    lazygit
 
     # Creative & Media Stack
     gimp
     inkscape
     audacity
     imagemagick
-    ffmpeg-full
 
     # Wayland & Desktop Quality-of-Life
     grim
@@ -171,15 +155,12 @@
     # Desktop Ricing & GUI Stack
     waybar
     rofi
-    awww
-    waypaper
     dunst
     hyprlock
     hypridle
     hyprpolkitagent
     networkmanagerapplet
     eww
-    cava
     wlogout
 
     # KDE Service Framework & MIME Utilities
@@ -190,16 +171,13 @@
     shared-mime-info
     desktop-file-utils
 
-    # System Monitoring
-    btop
-
-    # Container & Compression Utilities
-    podman
-    distrobox
-    unzip
-    p7zip
+    # System & Hardware Inspection
     pciutils
     lshw
+
+    # Containers
+    podman
+    distrobox
 
     # Gaming Stack & Utilities
     protonup-qt

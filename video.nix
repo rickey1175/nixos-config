@@ -1,14 +1,11 @@
-# =========================================================================
-# NVIDIA GPU, CUDA & VIDEO PRODUCTION MODULE (MAIN PC ONLY)
-# =========================================================================
 { config, pkgs, ... }:
 
 {
-  # Bootloader Early KMS Modules for Nvidia
+  # Bootloader Early KMS Modules for NVIDIA
   boot.initrd.kernelModules = [ "nvidia" "nvidia_modeset" "nvidia_uvm" "nvidia_drm" ];
   boot.kernelParams = [ "nvidia_drm.fbdev=1" ];
 
-  # Wayland Environment Variables for Nvidia
+  # Wayland Environment Variables for NVIDIA
   environment.sessionVariables = {
     NIXOS_OZONE_WL = "1";
     ELECTRON_OZONE_PLATFORM_HINT = "auto";
@@ -18,7 +15,7 @@
     __GLX_VENDOR_LIBRARY_NAME = "nvidia";
   };
 
-  # NVIDIA Ada Lovelace Drivers & CUDA Toolkit
+  # NVIDIA Graphics Drivers & CUDA Support
   hardware.graphics = {
     enable = true;
     enable32Bit = true;
@@ -34,12 +31,12 @@
     modesetting.enable = true;
     powerManagement.enable = false;
     powerManagement.finegrained = false;
-    open = true;
+    open = false; # Proprietary blob for rock-solid CUDA/NVENC support in Resolve
     nvidiaSettings = true;
     package = config.boot.kernelPackages.nvidiaPackages.latest;
   };
 
-  # Container Virtualization (Podman & NVIDIA CDI for DaVinci Resolve)
+  # Podman & NVIDIA Container Toolkit (CDI)
   virtualisation.podman = {
     enable = true;
     dockerCompat = true;
@@ -51,7 +48,7 @@
     mount-nvidia-executables = true;
   };
 
-  # Nvidia Monitoring & CUDA OBS Studio Stack
+  # NVIDIA GPU Monitoring & CUDA-Wrapped OBS Studio
   environment.systemPackages = with pkgs; [
     nvtopPackages.nvidia
     nvidia-container-toolkit

@@ -4,6 +4,9 @@
   home.username = "rickey";
   home.homeDirectory = lib.mkForce "/home/rickey";
 
+  # ---------------------------------------------------------------------------
+  # Zsh Configuration & Shell Aliases
+  # ---------------------------------------------------------------------------
   programs.zsh = {
     enable = true;
     shellAliases = {
@@ -11,12 +14,12 @@
       fm = "yazi";
       filemanager = "dolphin . &";
 
-      # Core Utility Replacements
+      # Core Replacements
       ls = "eza --icons";
       ll = "eza -la --icons";
       cat = "bat";
 
-      # NixOS Quick Rebuild Shortcuts
+      # NixOS Quick Shortcuts
       rebuild = "sudo nixos-rebuild switch --flake ~/nixos#nixos";
       nc = "cd ~/nixos && nvim configuration.nix";
       nh = "cd ~/nixos && nvim home.nix";
@@ -37,18 +40,20 @@
     enableZshIntegration = true;
   };
 
-  # Complete User-Space Packages List
+  # ---------------------------------------------------------------------------
+  # User-Space Packages
+  # ---------------------------------------------------------------------------
   home.packages = with pkgs; [
-    # Desktop Applications
+    # GUI Applications
     brave
     waypaper
 
-    # Wallpaper Daemons & Backends
+    # Wallpaper Daemons
     hyprpaper
     awww
     swaybg
 
-    # Terminal UI Tools & File Managers
+    # Terminal UI & CLI Utilities
     yazi
     fzf
     eza
@@ -58,8 +63,6 @@
     fastfetch
     btop
     pavucontrol
-
-    # CLI & Development Utilities
     ripgrep
     fd
     jq
@@ -68,24 +71,26 @@
     wl-clipboard
     playerctl
 
-    # Declarative Portal Fix Binary (With Direct Execution Bypass)
+    # Declarative Portal Fix Script
     (writeShellScriptBin "fix-portal" ''
-      ${dbus}/bin/dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE
-      ${systemd}/bin/systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE
+      ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE
+      ${pkgs.systemd}/bin/systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE
       
       # Kill any stuck portal instances
       pkill -f xdg-desktop-portal || true
       
       # Restart the Hyprland backend
-      ${systemd}/bin/systemctl --user restart xdg-desktop-portal-hyprland
+      ${pkgs.systemd}/bin/systemctl --user restart xdg-desktop-portal-hyprland
       sleep 1
       
-      # Try starting via systemctl, or fallback to launching directly
-      ${systemd}/bin/systemctl --user start xdg-desktop-portal 2>/dev/null || ${pkgs.xdg-desktop-portal}/libexec/xdg-desktop-portal &
+      # Try starting via systemctl, or fallback to direct execution
+      ${pkgs.systemd}/bin/systemctl --user start xdg-desktop-portal 2>/dev/null || ${pkgs.xdg-desktop-portal}/libexec/xdg-desktop-portal &
     '')
   ];
 
-  # Dotfile Symlinks from ~/nixos
+  # ---------------------------------------------------------------------------
+  # Dotfile Symlinks
+  # ---------------------------------------------------------------------------
   xdg.configFile."hypr".source = ./hypr;
   xdg.configFile."kitty".source = ./kitty;
   xdg.configFile."waybar".source = ./waybar;

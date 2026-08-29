@@ -11,7 +11,7 @@
 
   outputs = { self, nixpkgs, home-manager, ... }@inputs: {
     nixosConfigurations = {
-      # Desktop Setup (Main Rig - NVIDIA + Desktop Hardware)
+      # Main Desktop Rig (NVIDIA + Desktop Hardware)
       nixos = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
@@ -29,7 +29,7 @@
         ];
       };
 
-      # Laptop Setup (Intel Only - Independent Hardware)
+      # Laptop Setup (Intel Only)
       laptop = nixpkgs.lib.nixosSystem {
         system = "x86_64-linux";
         modules = [
