@@ -29,7 +29,7 @@
         exec Hyprland
       fi
     '';
-    initExtra = ''
+    initContent = ''
       fastfetch
     '';
   };
@@ -48,10 +48,11 @@
     brave
     waypaper
 
-    # Wallpaper Daemons
+    # Wallpaper Daemons & Dynamic Theming
     hyprpaper
-    swww
+    awww
     swaybg
+    pywal
 
     # Terminal UI & CLI Utilities
     yazi
@@ -70,6 +71,11 @@
     p7zip
     wl-clipboard
     playerctl
+
+    # Global Theming Dispatcher Wrapper
+    (writeShellScriptBin "set_theme.sh" ''
+      exec "${config.home.homeDirectory}/nixos/quickshell/scripts/set_theme.sh" "$@"
+    '')
 
     # Declarative Portal Fix Script
     (writeShellScriptBin "fix-portal" ''
@@ -97,8 +103,8 @@
   xdg.configFile."waypaper".source = ./waypaper;
   xdg.configFile."cava".source = ./cava;
 
-  # Live symlink to the dedicated quickshell repository
-  xdg.configFile."quickshell".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/quickshell";
+  # Out-of-store symlink to your tracked in-flake quickshell directory
+  xdg.configFile."quickshell".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nixos/quickshell";
 
   home.stateVersion = "26.05";
 }
