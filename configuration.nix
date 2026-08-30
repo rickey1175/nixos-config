@@ -131,6 +131,20 @@
     kdePackages.qtdeclarative
     kdePackages.qtsvg
 
+    # Dynamic Theming & Wallpaper Engine
+    pywal
+    matugen
+    swww
+    jq
+
+    # Audio & WirePlumber Control
+    wireplumber
+    pulseaudio
+
+    # Bluetooth Management
+    bluez
+    bluez-tools
+
     # Core Editors, Shell & Terminal Tools
     vim
     git
@@ -159,6 +173,7 @@
     wf-recorder
     cliphist
     brightnessctl
+    playerctl
 
     # Storage & Virtualization Tools
     gparted
