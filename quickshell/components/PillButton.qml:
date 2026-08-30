@@ -1,0 +1,25 @@
+import QtQuick
+import QtQuick.Layouts
+
+Rectangle {
+    id: root
+    property color bg: "#313244"
+    property int padH: 12
+    property int padV: 6
+
+    implicitHeight: 28
+    radius: 8
+    color: bg
+
+    default property alias content: innerLayout.data
+
+    RowLayout {
+        id: innerLayout
+        anchors.fill: parent
+        anchors.leftMargin: root.padH
+        anchors.rightMargin: root.padH
+        anchors.topMargin: root.padV
+        anchors.bottomMargin: root.padV
+        spacing: 6
+    }
+}

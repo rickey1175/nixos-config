@@ -1,3 +1,5 @@
+@import "~/.cache/rofi/colors.rasi"
+
 configuration {
     modi:                       "drun,run,filebrowser";
     show-icons:                 true;
@@ -7,21 +9,18 @@ configuration {
 }
 
 * {
-    /* Translucent Helldivers Blue Window Background */
-    bg-col:                     rgba(10, 22, 36, 0.75);
-    bg-col-light:               rgba(18, 38, 58, 0.85);
-    border-col:                 rgba(0, 180, 216, 0.35);
+    /* Dynamic Pywal / Quickshell Linked Variables */
+    bg-col:                     @background;
+    bg-col-light:               @background-alt;
+    border-col:                 @selected;
     
-    /* Super Earth Yellow Main Text & Muted Category Text */
-    yellow-text:                #FFE800;
-    muted-yellow:               rgba(255, 232, 0, 0.60);
+    /* Text & Highlight Variables */
+    main-text:                  @foreground;
+    active-accent:              @selected;
+    urgent-accent:              @urgent;
 
-    /* Orbital Strike Beacon Red Active Selection */
-    beacon-red:                 #FF0033;
-    beacon-bg:                  rgba(255, 0, 51, 0.30);
-    
     background-color:           transparent;
-    text-color:                 @yellow-text;
+    text-color:                 @main-text;
     margin:                     0;
     padding:                    0;
 }
@@ -29,7 +28,7 @@ configuration {
 window {
     height:                     520px;
     width:                      600px;
-    border:                     1px;
+    border:                     2px;
     border-color:               @border-col;
     border-radius:              24px;
     background-color:           @bg-col;
@@ -52,8 +51,8 @@ inputbar {
 
 entry {
     placeholder:                "drun Search";
-    placeholder-color:          @muted-yellow;
-    text-color:                 @yellow-text;
+    placeholder-color:          @background-alt;
+    text-color:                 @main-text;
     background-color:           transparent;
 }
 
@@ -72,17 +71,17 @@ element {
     border-radius:              14px;
     spacing:                    14px;
     background-color:           transparent;
-    text-color:                 @yellow-text;
+    text-color:                 @main-text;
     children:                   [ "element-icon", "element-text" ];
 }
 
-/* Force all unselected element states to stay transparent */
+/* Force unselected elements to stay transparent */
 element normal.normal,
 element normal.active,
 element alternate.normal,
 element alternate.active {
     background-color:           transparent;
-    text-color:                 @yellow-text;
+    text-color:                 @main-text;
 }
 
 element-icon {
@@ -96,11 +95,16 @@ element-text {
     text-color:                 inherit;
 }
 
-/* Orbital Strike Red Highlight on Active Hover / Selection */
+/* Dynamic Accent Highlight on Selection */
 element selected.normal,
 element selected.active {
-    background-color:           @beacon-bg;
+    background-color:           @active-accent;
     border:                     1px;
-    border-color:               @beacon-red;
+    border-color:               @border-col;
+    text-color:                 @background;
+}
+
+element selected.urgent {
+    background-color:           @urgent-accent;
     text-color:                 #FFFFFF;
 }

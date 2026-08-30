@@ -1,0 +1,18 @@
+import QtQuick
+import QtQuick.Layouts
+
+Text {
+    id: clockText
+    property var colors
+    text: Qt.formatTime(new Date(), "hh:mm AP")
+    color: colors?.secondary ?? "#89b4fa"
+    font.pixelSize: 13
+    font.bold: true
+
+    Timer {
+        interval: 1000
+        running: true
+        repeat: true
+        onTriggered: clockText.text = Qt.formatTime(new Date(), "hh:mm AP")
+    }
+}
