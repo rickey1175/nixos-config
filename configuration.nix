@@ -23,9 +23,18 @@
   nixpkgs.config.allowUnfree = true;
 
   # ---------------------------------------------------------------------------
-  # System Shell, Hyprland & Keybindings
+  # System Shell, Hyprland & Autostart Configuration
   # ---------------------------------------------------------------------------
-  programs.zsh.enable = true;
+  programs.zsh = {
+    enable = true;
+    # Automatically start Hyprland on TTY1 auto-login
+    loginShellInit = ''
+      if [ -z "$DISPLAY" ] && [ "$XDG_VTNR" -eq 1 ]; then
+        exec Hyprland
+      fi
+    '';
+  };
+
   programs.hyprland.enable = true;
   programs.fzf = {
     keybindings = true;
@@ -33,7 +42,7 @@
   };
 
   # ---------------------------------------------------------------------------
-  # User Account Configuration
+  # User Account Configuration & Auto-Login
   # ---------------------------------------------------------------------------
   users.users.rickey = {
     isNormalUser = true;
@@ -42,7 +51,7 @@
     shell = pkgs.zsh;
   };
 
-  # Automatic TTY1 Login
+  # Direct TTY1 Auto-Login on Startup
   services.getty.autologinUser = "rickey";
 
   # ---------------------------------------------------------------------------
@@ -66,6 +75,8 @@
   # Screencasting & Unified Desktop Portals
   # ---------------------------------------------------------------------------
   security.polkit.enable = true;
+  security.pam.services.hyprlock = {};
+
   xdg.portal = {
     enable = true;
     extraPortals = [
