@@ -1,10 +1,10 @@
 {
   "barBackground": "transparent",
-  "pillBg": "#0d1320cc",
-  "pillBorder": "#4A31B466",
-  "cyan": "#4A31B4",
-  "gold": "#5D6299",
-  "red": "#581BA0",
+  "pillBg": "#0e1621cc",
+  "pillBorder": "#3E51AE66",
+  "cyan": "#3E51AE",
+  "gold": "#4B6F92",
+  "red": "#3A6489",
   "text": "#c2c4c7",
-  "inactiveText": "#5d6371"
+  "inactiveText": "#5d6672"
 }
