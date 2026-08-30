@@ -35,7 +35,7 @@ hl.on("hyprland.start", function ()
    hl.exec_cmd("fix-portal &")
 
    -- Core Desktop Daemons & Applets
-   hl.exec_cmd("waybar &")
+   hl.exec_cmd("quickshell &")
    hl.exec_cmd("swww-daemon & sleep 0.5 && waypaper --restore &")
    hl.exec_cmd("hypridle &")
    hl.exec_cmd("nm-applet --indicator &")

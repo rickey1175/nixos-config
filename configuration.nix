@@ -1,10 +1,11 @@
-{ config, pkgs, ... }:
+{ config, pkgs, inputs, ... }:
 
 {
   # ---------------------------------------------------------------------------
   # Bootloader Configuration
   # ---------------------------------------------------------------------------
   boot.loader.systemd-boot.enable = true;
+  boot.loader.systemd-boot.configurationLimit = 5;
   boot.loader.efi.canTouchEfiVariables = true;
 
   # ---------------------------------------------------------------------------
@@ -114,6 +115,11 @@
   # Base System Packages (Shared Across Desktop & Laptop)
   # ---------------------------------------------------------------------------
   environment.systemPackages = with pkgs; [
+    # Quickshell & Qt Framework
+    inputs.quickshell.packages.${pkgs.system}.default
+    kdePackages.qtdeclarative
+    kdePackages.qtsvg
+
     # Core Editors, Shell & Terminal Tools
     vim
     git
@@ -153,15 +159,11 @@
     OVMF
 
     # Desktop Ricing & GUI Stack
-    waybar
     rofi
-    dunst
     hyprlock
     hypridle
     hyprpolkitagent
     networkmanagerapplet
-    eww
-    wlogout
 
     # KDE Service Framework & MIME Utilities
     kdePackages.kio
@@ -175,9 +177,12 @@
     pciutils
     lshw
 
-    # Containers
+    # Containers & Compression
     podman
     distrobox
+    unzip
+    p7zip
+    unrar
 
     # Gaming Stack & Utilities
     protonup-qt

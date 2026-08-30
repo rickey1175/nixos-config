@@ -1,4 +1,4 @@
-{ config, pkgs, lib, ... }:
+{ config, pkgs, lib, inputs, ... }:
 
 {
   home.username = "rickey";
@@ -29,7 +29,7 @@
         exec Hyprland
       fi
     '';
-    initContent = ''
+    initExtra = ''
       fastfetch
     '';
   };
@@ -50,7 +50,7 @@
 
     # Wallpaper Daemons
     hyprpaper
-    awww
+    swww
     swaybg
 
     # Terminal UI & CLI Utilities
@@ -93,10 +93,12 @@
   # ---------------------------------------------------------------------------
   xdg.configFile."hypr".source = ./hypr;
   xdg.configFile."kitty".source = ./kitty;
-  xdg.configFile."waybar".source = ./waybar;
   xdg.configFile."rofi".source = ./rofi;
   xdg.configFile."waypaper".source = ./waypaper;
   xdg.configFile."cava".source = ./cava;
+
+  # Live symlink to the dedicated quickshell repository
+  xdg.configFile."quickshell".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/quickshell";
 
   home.stateVersion = "26.05";
 }
