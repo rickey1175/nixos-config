@@ -75,7 +75,6 @@
   # Screencasting & Unified Desktop Portals
   # ---------------------------------------------------------------------------
   security.polkit.enable = true;
-  security.pam.services.hyprlock = {};
 
   xdg.portal = {
     enable = true;
@@ -111,7 +110,6 @@
     enable = true;
     powerOnBoot = true;
   };
-  services.blueman.enable = true;
 
   # ---------------------------------------------------------------------------
   # Font Configuration
@@ -141,7 +139,7 @@
     wireplumber
     pulseaudio
 
-    # Bluetooth Management
+    # Bluetooth Management CLI
     bluez
     bluez-tools
 
@@ -166,7 +164,7 @@
     audacity
     imagemagick
 
-    # Wayland & Desktop Quality-of-Life
+    # Wayland Utilities
     grim
     slurp
     swappy
@@ -184,12 +182,8 @@
     qemu_kvm
     OVMF
 
-    # Desktop Ricing & GUI Stack
-    rofi
-    hyprlock
-    hypridle
+    # Authentication Agent
     hyprpolkitagent
-    networkmanagerapplet
 
     # KDE Service Framework & MIME Utilities
     kdePackages.kio

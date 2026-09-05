@@ -1,5 +1,5 @@
 -- -----------------------------------------------------------------------------
--- HYPRLAND LUA CONFIGURATION (V8 - INCREASED TRANSPARENCY + HELLDIVERS GRADIENT)
+-- HYPRLAND LUA CONFIGURATION (V9 - NATIVE QUICKSHELL + SCROLLER + DA-VINCI)
 -- -----------------------------------------------------------------------------
 
 ------------------
@@ -17,31 +17,18 @@ hl.monitor({
 ---------------------
 local terminal    = "kitty"
 local fileManager = "dolphin"
-local menu        = "rofi -show drun"
-local clipMenu    = "cliphist list | rofi -dmenu -p 'Clipboard' | cliphist decode | wl-copy"
 local obsApp      = "env QT_QPA_PLATFORM=wayland obs"
 
 -------------------
 ---- AUTOSTART ----
 -------------------
 hl.on("hyprland.start", function ()
-   -- Import environment variables into DBus and systemd
    hl.exec_cmd("systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE &")
-
-   -- Signal systemd that the graphical session is active
    hl.exec_cmd("systemctl --user start graphical-session.target &")
-
-   -- Declarative Portal Fix (Restarts xdg-desktop-portal cleanly)
    hl.exec_cmd("fix-portal &")
-
-   -- Core Desktop Daemons & Applets
+   hl.exec_cmd("hyprctl plugin load " .. (os.getenv("HOME") or "/home/rickey") .. "/.nix-profile/lib/libhyprscroller.so || hyprctl plugin load /run/current-system/sw/lib/libhyprscroller.so &")
    hl.exec_cmd("quickshell &")
-   hl.exec_cmd("swww-daemon & sleep 0.5 && waypaper --restore &")
-   hl.exec_cmd("hypridle &")
-   hl.exec_cmd("nm-applet --indicator &")
-   hl.exec_cmd("blueman-applet &")
-
-   -- Clipboard History Daemons (Text & Images)
+   hl.exec_cmd("swww-daemon &")
    hl.exec_cmd("wl-paste --type text --watch cliphist store &")
    hl.exec_cmd("wl-paste --type image --watch cliphist store &")
 end)
@@ -62,17 +49,15 @@ hl.config({
        gaps_out = 10,
        border_size = 2,
        col = {
-           -- Helldivers Gold (#FFE135) Top -> Stratagem Blue (#00E5FF) Bottom at 180deg
-           active_border   = { colors = {"rgba(FFE135ee)", "rgba(00E5FFee)"}, angle = 180 },
-           inactive_border = "rgba(12263aaa)",
+           active_border   = "0xeeffe135",
+           inactive_border = "0xaa12263a",
        },
        resize_on_border = true,
        allow_tearing = false,
-       layout = "dwindle",
+       layout = "scroller",
    },
    decoration = {
        rounding         = 12,
-       -- Dialed up global window transparency
        active_opacity   = 0.78,
        inactive_opacity = 0.65,
        blur = {
@@ -87,7 +72,6 @@ hl.config({
    },
 })
 
--- Bezier Curves & Springs
 hl.curve("easeOutQuint",   { type = "bezier", points = { {0.23, 1},    {0.32, 1}    } })
 hl.curve("easeInOutCubic", { type = "bezier", points = { {0.65, 0.05}, {0.36, 1}    } })
 hl.curve("linear",         { type = "bezier", points = { {0, 0},       {1, 1}       } })
@@ -95,7 +79,6 @@ hl.curve("almostLinear",   { type = "bezier", points = { {0.5, 0.5},   {0.75, 1}
 hl.curve("quick",          { type = "bezier", points = { {0.15, 0},    {0.1, 1}     } })
 hl.curve("easy",           { type = "spring", mass = 1, stiffness = 71.2633, dampening = 15.8273644 })
 
--- Animations
 hl.animation({ leaf = "global",        enabled = true,  speed = 10,   bezier = "default" })
 hl.animation({ leaf = "border",        enabled = true,  speed = 5.39, bezier = "easeOutQuint" })
 hl.animation({ leaf = "windows",       enabled = true,  speed = 4.79, spring = "easy" })
@@ -113,21 +96,6 @@ hl.animation({ leaf = "workspaces",    enabled = true,  speed = 1.94, bezier = "
 hl.animation({ leaf = "workspacesIn",  enabled = true,  speed = 1.21, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "workspacesOut", enabled = true,  speed = 1.94, bezier = "almostLinear", style = "fade" })
 hl.animation({ leaf = "zoomFactor",    enabled = true,  speed = 7,    bezier = "quick" })
-
------------------
----- LAYOUTS ----
------------------
-hl.config({
-   dwindle = {
-       preserve_split = true,
-   },
-   master = {
-       new_status = "master",
-   },
-   scrolling = {
-       fullscreen_on_one_column = true,
-   },
-})
 
 --------------
 ---- MISC ----
@@ -161,48 +129,54 @@ hl.gesture({
    direction = "horizontal",
    action    = "workspace"
 })
-hl.device({
-   name        = "epic-mouse-v1",
-   sensitivity = -0.5,
-})
 
 ---------------------
 ---- KEYBINDINGS ----
 ---------------------
 local mainMod = "SUPER"
 
--- Application Binds
+-- Core Application Binds
 hl.bind(mainMod .. " + RETURN", hl.dsp.exec_cmd(terminal))
 hl.bind(mainMod .. " + Q",      hl.dsp.window.close())
-hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd(menu))
-hl.bind(mainMod .. " + C",      hl.dsp.exec_cmd(clipMenu))
-hl.bind(mainMod .. " + M",      hl.dsp.exec_cmd("command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 hl.bind(mainMod .. " + E",      hl.dsp.exec_cmd(fileManager))
-hl.bind(mainMod .. " + W",      hl.dsp.exec_cmd("waypaper"))
 hl.bind(mainMod .. " + O",      hl.dsp.exec_cmd(obsApp))
 hl.bind(mainMod .. " + V",      hl.dsp.window.float({ action = "toggle" }))
-hl.bind(mainMod .. " + P",      hl.dsp.window.pseudo())
-hl.bind(mainMod .. " + J",      hl.dsp.layout("togglesplit"))
 hl.bind(mainMod .. " + F",      hl.dsp.window.fullscreen())
+
+-- Quickshell Clean Wrapper Keybinds
+hl.bind(mainMod .. " + SPACE",  hl.dsp.exec_cmd("qs-launcher"))
+hl.bind(mainMod .. " + W",      hl.dsp.exec_cmd("qs-wallpapers"))
+hl.bind(mainMod .. " + L",      hl.dsp.exec_cmd("quickshell ipc call lock activate"))
+
+-- Super + Tab Overview (Task View)
+hl.bind(mainMod .. " + TAB", hl.dsp.exec_cmd("hyprctl dispatch scroller:toggleoverview"))
+
+-- Scroller Column Focus Movement (HJKL & Arrows)
+hl.bind(mainMod .. " + left",  hl.dsp.exec_cmd("hyprctl dispatch scroller:movefocus l"))
+hl.bind(mainMod .. " + right", hl.dsp.exec_cmd("hyprctl dispatch scroller:movefocus r"))
+hl.bind(mainMod .. " + up",    hl.dsp.exec_cmd("hyprctl dispatch scroller:movefocus u"))
+hl.bind(mainMod .. " + down",  hl.dsp.exec_cmd("hyprctl dispatch scroller:movefocus d"))
+hl.bind(mainMod .. " + h",     hl.dsp.exec_cmd("hyprctl dispatch scroller:movefocus l"))
+hl.bind(mainMod .. " + l",     hl.dsp.exec_cmd("hyprctl dispatch scroller:movefocus r"))
+hl.bind(mainMod .. " + k",     hl.dsp.exec_cmd("hyprctl dispatch scroller:movefocus u"))
+hl.bind(mainMod .. " + j",     hl.dsp.exec_cmd("hyprctl dispatch scroller:movefocus d"))
+
+-- Scroller Move Window Between Columns
+hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.exec_cmd("hyprctl dispatch scroller:movewindow l"))
+hl.bind(mainMod .. " + SHIFT + right", hl.dsp.exec_cmd("hyprctl dispatch scroller:movewindow r"))
+hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.exec_cmd("hyprctl dispatch scroller:movewindow u"))
+hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.exec_cmd("hyprctl dispatch scroller:movewindow d"))
+hl.bind(mainMod .. " + SHIFT + h",     hl.dsp.exec_cmd("hyprctl dispatch scroller:movewindow l"))
+hl.bind(mainMod .. " + SHIFT + l",     hl.dsp.exec_cmd("hyprctl dispatch scroller:movewindow r"))
+
+-- Scroller Column Sizing Controls
+hl.bind(mainMod .. " + bracketleft",  hl.dsp.exec_cmd("hyprctl dispatch scroller:cyclesize prev"))
+hl.bind(mainMod .. " + bracketright", hl.dsp.exec_cmd("hyprctl dispatch scroller:cyclesize next"))
+hl.bind(mainMod .. " + equal",        hl.dsp.exec_cmd("hyprctl dispatch scroller:fitsize visible"))
 
 -- Screenshots & Annotations (Grim + Slurp + Swappy)
 hl.bind("Print",         hl.dsp.exec_cmd('grim -g "$(slurp)" - | swappy -f -'))
 hl.bind("SHIFT + Print", hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
-
--- Lock Screen Shortcut
-hl.bind(mainMod .. " + L", hl.dsp.exec_cmd('nohup bash -c "while pgrep hyprlock > /dev/null; do ~/.config/hypr/scripts/get_cover.sh; sleep 2; done" >/dev/null 2>&1 & hyprlock'))
-
--- Focus Movement
-hl.bind(mainMod .. " + left",  hl.dsp.focus({ direction = "left" }))
-hl.bind(mainMod .. " + right", hl.dsp.focus({ direction = "right" }))
-hl.bind(mainMod .. " + up",    hl.dsp.focus({ direction = "up" }))
-hl.bind(mainMod .. " + down",  hl.dsp.focus({ direction = "down" }))
-
--- Move Active Window Around (Keyboard)
-hl.bind(mainMod .. " + SHIFT + left",  hl.dsp.window.move({ direction = "left" }))
-hl.bind(mainMod .. " + SHIFT + right", hl.dsp.window.move({ direction = "right" }))
-hl.bind(mainMod .. " + SHIFT + up",    hl.dsp.window.move({ direction = "up" }))
-hl.bind(mainMod .. " + SHIFT + down",  hl.dsp.window.move({ direction = "down" }))
 
 -- Workspaces Navigation & Moving Windows
 for i = 1, 10 do
@@ -221,17 +195,13 @@ hl.bind(mainMod .. " + mouse_up",   hl.dsp.focus({ workspace = "e-1" }))
 hl.bind(mainMod .. " + mouse:272",  hl.dsp.window.drag(),   { mouse = true })
 hl.bind(mainMod .. " + mouse:273",  hl.dsp.window.resize(), { mouse = true })
 
--- Audio & Volume Controls
+-- Audio & Hardware Controls
 hl.bind("XF86AudioRaiseVolume", hl.dsp.exec_cmd("wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+"), { locked = true, repeating = true })
 hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"),      { locked = true, repeating = true })
 hl.bind("XF86AudioMute",        hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),     { locked = true, repeating = true })
 hl.bind("XF86AudioMicMute",     hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"),   { locked = true, repeating = true })
-
--- Screen Brightness
 hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), { locked = true, repeating = true })
 hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), { locked = true, repeating = true })
-
--- Media Player Controls
 hl.bind("XF86AudioNext",  hl.dsp.exec_cmd("playerctl next"),       { locked = true })
 hl.bind("XF86AudioPause", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 hl.bind("XF86AudioPlay",  hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
@@ -241,59 +211,35 @@ hl.bind("XF86AudioPrev",  hl.dsp.exec_cmd("playerctl previous"),   { locked = tr
 ---- WINDOWS AND WORKSPACES ----
 --------------------------------
 
--- App Specific Transparency Rules via hl.window_rule API
-hl.window_rule({
-    name    = "kitty-opacity",
-    match   = { class = "kitty" },
-    opacity = 0.72,
-})
-hl.window_rule({
-    name    = "vscode-opacity",
-    match   = { class = "^(Code|code-url-handler|VSCode)$" },
-    opacity = 0.80,
-})
-hl.window_rule({
-    name    = "dolphin-opacity",
-    match   = { class = "org.kde.dolphin" },
-    opacity = 0.78,
-})
-hl.window_rule({
-    name    = "discord-opacity",
-    match   = { class = "discord" },
-    opacity = 0.80,
-})
-hl.window_rule({
-    name    = "gimp-opacity",
-    match   = { class = "^(Gimp|gimp-.*)$" },
-    opacity = 0.88,
-})
-hl.window_rule({
-    name    = "obs-opacity",
-    match   = { class = "com.obsproject.Studio" },
-    opacity = 0.85,
-})
+-- App Opacity
+hl.window_rule({ name = "kitty-opacity", match = { class = "kitty" }, opacity = 0.72 })
+hl.window_rule({ name = "vscode-opacity", match = { class = "^(Code|code-url-handler|VSCode)$" }, opacity = 0.80 })
+hl.window_rule({ name = "dolphin-opacity", match = { class = "org.kde.dolphin" }, opacity = 0.78 })
+hl.window_rule({ name = "discord-opacity", match = { class = "discord" }, opacity = 0.80 })
+hl.window_rule({ name = "gimp-opacity", match = { class = "^(Gimp|gimp-.*)$" }, opacity = 0.88 })
+hl.window_rule({ name = "obs-opacity", match = { class = "com.obsproject.Studio" }, opacity = 0.85 })
 
--- Creative & Utility Floating Dialogs
+-- Floating Dialogs
+hl.window_rule({ name = "swappy-float", match = { class = "swappy" }, float = true })
+hl.window_rule({ name = "piper-float", match = { class = "ratbag-piper|piper" }, float = true })
+hl.window_rule({ name = "goverlay-float", match = { class = "goverlay" }, float = true })
+
+-- DaVinci Resolve Window Handling
 hl.window_rule({
-    name    = "swappy-float",
-    match   = { class = "swappy" },
-    float   = true,
+    name = "resolve-suppress-maximize",
+    match = { class = "^(resolve)$" },
+    suppress_event = "maximize",
 })
 hl.window_rule({
-    name    = "piper-float",
-    match   = { class = "ratbag-piper|piper" },
-    float   = true,
-})
-hl.window_rule({
-    name    = "goverlay-float",
-    match   = { class = "goverlay" },
-    float   = true,
+    name = "resolve-project-manager-float",
+    match = { class = "^(resolve)$", title = "^(Project Manager|Welcome to DaVinci Resolve)$" },
+    float = true,
 })
 
 -- Hyprland Core Window Rules
 hl.window_rule({
-    name           = "suppress-maximize-events",
-    match          = { class = ".*" },
+    name = "suppress-maximize-events",
+    match = { class = ".*" },
     suppress_event = "maximize",
 })
 hl.window_rule({
@@ -307,10 +253,4 @@ hl.window_rule({
        pin        = false,
    },
    no_focus = true,
-})
-hl.window_rule({
-   name  = "move-hyprland-run",
-   match = { class = "hyprland-run" },
-   move  = "20 monitor_h-120",
-   float = true,
 })

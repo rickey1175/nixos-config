@@ -1,4 +1,5 @@
 import Quickshell
+import Quickshell.Io
 import Quickshell.Wayland
 import QtQuick
 import QtQuick.Layouts
@@ -7,10 +8,58 @@ import "modules"
 ShellRoot {
     id: root
 
-    // Reference the singleton theme directly
     property var colors: Theme
 
-    // Global Overlays
+    // Helper to close any open header dropdowns
+    function closeDropdowns() {
+        globalCalendar.isOpen = false
+        globalBluetooth.isOpen = false
+        globalNotifPanel.isOpen = false
+    }
+
+    // IPC Targets for Hyprland Keybinds
+    IpcHandler {
+        target: "launcher"
+        function toggle() {
+            root.closeDropdowns()
+            globalPowerMenu.isOpen = false
+            globalWallSelector.isOpen = false
+            globalLauncher.toggle()
+        }
+    }
+
+    IpcHandler {
+        target: "powermenu"
+        function toggle() {
+            root.closeDropdowns()
+            globalLauncher.isOpen = false
+            globalWallSelector.isOpen = false
+            globalPowerMenu.isOpen = !globalPowerMenu.isOpen
+        }
+    }
+
+    IpcHandler {
+        target: "wallpapers"
+        function toggle() {
+            root.closeDropdowns()
+            globalLauncher.isOpen = false
+            globalPowerMenu.isOpen = false
+            globalWallSelector.isOpen = !globalWallSelector.isOpen
+        }
+    }
+
+    IpcHandler {
+        target: "lock"
+        function activate() {
+            root.closeDropdowns()
+            globalLauncher.isOpen = false
+            globalPowerMenu.isOpen = false
+            globalWallSelector.isOpen = false
+            globalLockScreen.isLocked = true
+        }
+    }
+
+    // Global Overlay Singletons
     WallpaperSelector {
         id: globalWallSelector
         colors: root.colors
@@ -25,6 +74,16 @@ ShellRoot {
 
     CalendarDropdown {
         id: globalCalendar
+        colors: root.colors
+    }
+
+    BluetoothDropdown {
+        id: globalBluetooth
+        colors: root.colors
+    }
+
+    AppLauncher {
+        id: globalLauncher
         colors: root.colors
     }
 
@@ -94,8 +153,13 @@ ShellRoot {
                     // Center
                     CenterCluster {
                         colors: root.colors
-                        onToggleCalendar: globalCalendar.isOpen = !globalCalendar.isOpen
-                        onToggleNotifPanel: globalNotifPanel.isOpen = !globalNotifPanel.isOpen
+                        onToggleCalendar: {
+                            globalBluetooth.isOpen = false
+                            globalCalendar.isOpen = !globalCalendar.isOpen
+                        }
+                        onToggleNotifPanel: {
+                            globalNotifPanel.isOpen = !globalNotifPanel.isOpen
+                        }
                     }
 
                     Item { Layout.fillWidth: true }
@@ -103,7 +167,14 @@ ShellRoot {
                     // Right
                     SystemControls {
                         colors: root.colors
-                        onRequestPowerMenu: globalPowerMenu.isOpen = !globalPowerMenu.isOpen
+                        onRequestPowerMenu: {
+                            root.closeDropdowns()
+                            globalPowerMenu.isOpen = !globalPowerMenu.isOpen
+                        }
+                        onToggleBluetooth: {
+                            globalCalendar.isOpen = false
+                            globalBluetooth.isOpen = !globalBluetooth.isOpen
+                        }
                     }
                 }
             }

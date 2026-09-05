@@ -7,6 +7,7 @@ RowLayout {
     id: root
     property var colors
     signal requestPowerMenu()
+    signal toggleBluetooth()
     spacing: 6
 
     property string volume: "50%"
@@ -29,7 +30,7 @@ RowLayout {
 
     Process {
         id: volProc
-        command: ["bash", "-c", "wpctl get-volume @DEFAULT_AUDIO_SINK@ | awk '{print int($2 * 100)\"%\"}'"]
+        command: ["bash", "-c", "wpctl get-volume @DEFAULT_AUDIO_SINK@ 2>/dev/null | awk '{print int($2 * 100)\"%\"}'"]
         stdout: StdioCollector {
             onStreamFinished: root.volume = this.text.trim() || "50%"
         }
@@ -78,7 +79,7 @@ RowLayout {
         MouseArea {
             anchors.fill: parent
             cursorShape: Qt.PointingHandCursor
-            onClicked: root.launchGui("blueman-manager")
+            onClicked: root.toggleBluetooth()
         }
     }
 

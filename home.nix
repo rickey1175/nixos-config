@@ -4,25 +4,17 @@
   home.username = "rickey";
   home.homeDirectory = lib.mkForce "/home/rickey";
 
-  # ---------------------------------------------------------------------------
-  # Zsh Configuration & Shell Aliases
-  # ---------------------------------------------------------------------------
   programs.zsh = {
     enable = true;
     shellAliases = {
-      # File Manager Shortcuts
       fm = "yazi";
       filemanager = "dolphin . &";
-
-      # Core Replacements
       ls = "eza --icons";
       ll = "eza -la --icons";
       cat = "bat";
-
-      # NixOS Quick Shortcuts
-      rebuild = "sudo nixos-rebuild switch --flake ~/nixos#nixos";
-      nc = "cd ~/nixos && nvim configuration.nix";
-      nh = "cd ~/nixos && nvim home.nix";
+      rebuild = "sudo nixos-rebuild switch --flake ~/nixos-config#nixos";
+      nc = "cd ~/nixos-config && nvim configuration.nix";
+      nh = "cd ~/nixos-config && nvim home.nix";
     };
     profileExtra = ''
       if [ -z "$DISPLAY" ] && [ "$(tty)" = "/dev/tty1" ]; then
@@ -34,27 +26,19 @@
     '';
   };
 
-  # Native Zoxide Integration
   programs.zoxide = {
     enable = true;
     enableZshIntegration = true;
   };
 
-  # ---------------------------------------------------------------------------
-  # User-Space Packages
-  # ---------------------------------------------------------------------------
   home.packages = with pkgs; [
-    # GUI Applications
+    inputs.hyprland-plugins.packages.${pkgs.system}.hyprscroller or pkgs.emptyDirectory
     brave
-    waypaper
-
-    # Wallpaper Daemons & Dynamic Theming
     hyprpaper
-    awww
+    swww
     swaybg
     pywal
-
-    # Terminal UI & CLI Utilities
+    matugen
     yazi
     fzf
     eza
@@ -71,40 +55,42 @@
     p7zip
     wl-clipboard
     playerctl
+    brightnessctl
+    grim
+    slurp
+    swappy
 
-    # Global Theming Dispatcher Wrapper
-    (writeShellScriptBin "set_theme.sh" ''
-      exec "${config.home.homeDirectory}/nixos/quickshell/scripts/set_theme.sh" "$@"
+    # Zero-argument binary wrappers for Hyprland dispatch
+    (writeShellScriptBin "qs-launcher" ''
+      exec quickshell ipc call launcher toggle
     '')
 
-    # Declarative Portal Fix Script
+    (writeShellScriptBin "qs-powermenu" ''
+      exec quickshell ipc call powermenu toggle
+    '')
+
+    (writeShellScriptBin "qs-wallpapers" ''
+      exec quickshell ipc call wallpapers toggle
+    '')
+
+    (writeShellScriptBin "set_theme.sh" ''
+      exec "${config.home.homeDirectory}/nixos-config/quickshell/scripts/set_theme.sh" "$@"
+    '')
+
     (writeShellScriptBin "fix-portal" ''
       ${pkgs.dbus}/bin/dbus-update-activation-environment --systemd WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE
       ${pkgs.systemd}/bin/systemctl --user import-environment WAYLAND_DISPLAY XDG_CURRENT_DESKTOP HYPRLAND_INSTANCE_SIGNATURE
-      
-      # Kill any stuck portal instances
       pkill -f xdg-desktop-portal || true
-      
-      # Restart the Hyprland backend
       ${pkgs.systemd}/bin/systemctl --user restart xdg-desktop-portal-hyprland
       sleep 1
-      
-      # Try starting via systemctl, or fallback to direct execution
       ${pkgs.systemd}/bin/systemctl --user start xdg-desktop-portal 2>/dev/null || ${pkgs.xdg-desktop-portal}/libexec/xdg-desktop-portal &
     '')
   ];
 
-  # ---------------------------------------------------------------------------
-  # Dotfile Symlinks
-  # ---------------------------------------------------------------------------
   xdg.configFile."hypr".source = ./hypr;
   xdg.configFile."kitty".source = ./kitty;
-  xdg.configFile."rofi".source = ./rofi;
-  xdg.configFile."waypaper".source = ./waypaper;
   xdg.configFile."cava".source = ./cava;
-
-  # Out-of-store symlink to your tracked in-flake quickshell directory
-  xdg.configFile."quickshell".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nixos/quickshell";
+  xdg.configFile."quickshell".source = config.lib.file.mkOutOfStoreSymlink "${config.home.homeDirectory}/nixos-config/quickshell";
 
   home.stateVersion = "26.05";
 }
